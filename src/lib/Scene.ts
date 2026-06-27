@@ -114,7 +114,28 @@ export class Scene {
 
 		this.addGoal('red', new THREE.Vector3(-ft * 2 - 92, 0, ft * 3 + 89), new THREE.Euler(0, Math.PI / 2, 0));
 		this.addGoal('blue', new THREE.Vector3(ft * 2 + 92, 0, -ft * 3 - 89), new THREE.Euler(0, -Math.PI / 2, 0));
-		// this.addGoal('red', new THREE.Vector3(0, 0, 0));
+
+		this.addBeam12x2('blue', new THREE.Vector3(ft * 2.75, 0, ft * 3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(ft * 2.25, 0, ft * 3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(ft * 1.75, 0, ft * 3.5));
+		this.addBeam12x2('red', new THREE.Vector3(ft * 1.25, 0, ft * 3.5));
+		this.addBeam12x2('red', new THREE.Vector3(ft * 0.75, 0, ft * 3.5));
+		this.addBeam12x2('red', new THREE.Vector3(ft * 0.25, 0, ft * 3.5));
+		this.addBeam12x2('red', new THREE.Vector3(-ft * 0.25, 0, ft * 3.5));
+		this.addBeam12x2('red', new THREE.Vector3(-ft * 0.75, 0, ft * 3.5));
+		this.addBeam10x2('red', new THREE.Vector3(-ft * 1.25 + 10, 0, ft * 3.5));
+		this.addBeam12x2Gray(new THREE.Vector3(ft * 1.5, 0, ft * 3.75 + 13), new THREE.Euler(0, -Math.PI, 0));
+
+		this.addBeam12x2Gray(new THREE.Vector3(-ft * 1.5, 0, ft * -3.75 - 13), new THREE.Euler(0, Math.PI, 0));
+		this.addBeam10x2('blue', new THREE.Vector3(ft * 1.25 - 10, 0, ft * -3.5), new THREE.Euler(0, -Math.PI, 0));
+		this.addBeam12x2('blue', new THREE.Vector3(ft * 0.75, 0, ft * -3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(ft * 0.25, 0, ft * -3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(-ft * 0.25, 0, ft * -3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(-ft * 0.75, 0, ft * -3.5));
+		this.addBeam12x2('blue', new THREE.Vector3(-ft * 1.25, 0, ft * -3.5));
+		this.addBeam12x2('red', new THREE.Vector3(-ft * 1.75, 0, ft * -3.5));
+		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.25, 0, ft * -3.5));
+		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.75, 0, ft * -3.5));
 
 		const maxDim = 1600;
 
@@ -135,15 +156,14 @@ export class Scene {
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Structure.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Structure'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj', '/VIQRC-LevelUp-H2H-_-ColorRed.mtl', 'Goal Red'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Goal Blue'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Beam12x2 Blue'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam10x2.obj', '/VIQRC-LevelUp-H2H-_-ColorRed.mtl', 'Beam10x2 Red'),
 			this.modelLoader.loadModel(
-				'/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj',
-				'/VIQRC-LevelUp-H2H-_-ColorRed.mtl',
-				'Goal Red'
-			),
-			this.modelLoader.loadModel(
-				'/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj',
-				'/VIQRC-LevelUp-H2H-_-ColorBlue.mtl',
-				'Goal Blue'
+				'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
+				'/VIQRC-LevelUp-H2H-_-Common.mtl',
+				'Beam10x2 Gray'
 			)
 		]);
 
@@ -158,6 +178,71 @@ export class Scene {
 	public async addBeam(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)): Promise<BeamObject> {
 		// TODO: Level Up beam assets
 		throw new Error('Not implemented: Level Up beam assets');
+	}
+
+	public async addBeam12x2(
+		color: 'red' | 'blue',
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`Beam12x2 ${colorName[color]}`
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.gameObjects.push(beam);
+
+		console.log(`Added ${color} 12x2 beam at`, position);
+		return beam;
+	}
+
+	public async addBeam10x2(
+		color: 'red' | 'blue',
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam10x2.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`Beam10x2 ${colorName[color]}`
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.gameObjects.push(beam);
+
+		console.log(`Added ${color} 10x2 beam at`, position);
+		return beam;
+	}
+
+	public async addBeam12x2Gray(
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
+			'Beam10x2 Gray'
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.gameObjects.push(beam);
+
+		console.log('Added 10x2 gray beam at', position);
+		return beam;
 	}
 
 	public async addFloor(position: THREE.Vector3) {
