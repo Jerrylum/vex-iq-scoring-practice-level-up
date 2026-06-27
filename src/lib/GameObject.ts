@@ -122,6 +122,19 @@ export class L4BaseObject extends GameObject {
 	}
 }
 
+export class GoalObject extends GameObject {
+	constructor(model: THREE.Group, color: string) {
+		super(model, `Goal_${color}`);
+		this.prepareModel();
+	}
+
+	protected override prepareModel(): void {
+		this.model.rotation.x = -Math.PI / 2;
+		this.model.position.y = 111;
+		super.prepareModel();
+	}
+}
+
 export class Field extends GameObject {
 	constructor(model: THREE.Group) {
 		super(model, 'Field');

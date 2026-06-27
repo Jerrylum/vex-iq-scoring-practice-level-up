@@ -9,11 +9,18 @@ import {
 	WallObject,
 	CornerObject,
 	L4StructureObject,
-	L4BaseObject
+	L4BaseObject,
+	GoalObject
 } from './GameObject';
 import { Renderer } from './Renderer';
 
 export type PinColor = 'red' | 'blue' | 'orange';
+
+const colorName = {
+	red: 'Red',
+	blue: 'Blue',
+	orange: 'Orange'
+};
 
 export class Scene {
 	private renderer: Renderer;
@@ -105,6 +112,10 @@ export class Scene {
 		this.addL4Structure(new THREE.Vector3(-ft - 25.4 * 2, 0, ft), new THREE.Euler(0, Math.PI / 2, 0));
 		this.addL4Structure(new THREE.Vector3(ft + 25.4 * 2, 0, -ft), new THREE.Euler(0, -Math.PI / 2, 0));
 
+		this.addGoal('red', new THREE.Vector3(-ft * 2 - 92, 0, ft * 3 + 89), new THREE.Euler(0, Math.PI / 2, 0));
+		this.addGoal('blue', new THREE.Vector3(ft * 2 + 92, 0, -ft * 3 - 89), new THREE.Euler(0, -Math.PI / 2, 0));
+		// this.addGoal('red', new THREE.Vector3(0, 0, 0));
+
 		const maxDim = 1600;
 
 		this.renderer.setCameraView(new THREE.Vector3(1600, 1600, 0), new THREE.Vector3(0, 0, 0));
@@ -123,7 +134,17 @@ export class Scene {
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Wall'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Structure.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Structure'),
-			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base')
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base'),
+			this.modelLoader.loadModel(
+				'/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj',
+				'/VIQRC-LevelUp-H2H-_-ColorRed.mtl',
+				'Goal Red'
+			),
+			this.modelLoader.loadModel(
+				'/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj',
+				'/VIQRC-LevelUp-H2H-_-ColorBlue.mtl',
+				'Goal Blue'
+			)
 		]);
 
 		console.log('All game object models preloaded');
@@ -183,6 +204,22 @@ export class Scene {
 		this.fieldObjects.push(corner);
 		console.log('Added corner at', position);
 		return corner;
+	}
+
+	public async addGoal(color: 'red' | 'blue', position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`Goal ${colorName[color]}`
+		);
+		const goal = new GoalObject(model, color);
+		goal.setPosition(position);
+		goal.setRotation(rotation);
+
+		this.renderer.scene.add(goal.getObject());
+		this.fieldObjects.push(goal);
+		console.log(`Added ${color} goal at`, position);
+		return goal;
 	}
 
 	public async addL4Base(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
