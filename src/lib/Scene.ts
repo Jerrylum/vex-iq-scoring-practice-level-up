@@ -95,6 +95,8 @@ export class Scene {
 		this.addCorner(new THREE.Vector3(-2.75 * ft - 20, -126, +3.75 * ft + 20), 270);
 		this.addCorner(new THREE.Vector3(+2.75 * ft + 20, -126, +3.75 * ft + 20), 0);
 
+		// TODO: Level Up field elements
+
 		const maxDim = 1600;
 
 		this.renderer.setCameraView(new THREE.Vector3(1600, 1600, 0), new THREE.Vector3(0, 0, 0));
@@ -109,9 +111,9 @@ export class Scene {
 
 	private async preloadGameObjects(): Promise<void> {
 		await Promise.all([
-			this.modelLoader.loadModel('/VIQRC-MixAndMatch-H2H-_-GameObjects_Floor.obj', '/VIQRC-MixAndMatch-H2H-_-Common.mtl', 'Floor'),
-			this.modelLoader.loadModel('/VIQRC-MixAndMatch-H2H-_-GameObjects_Wall.obj', '/VIQRC-MixAndMatch-H2H-_-Common.mtl', 'Wall'),
-			this.modelLoader.loadModel('/VIQRC-MixAndMatch-H2H-_-GameObjects_Corner.obj', '/VIQRC-MixAndMatch-H2H-_-Common.mtl', 'Corner')
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Floor.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Floor'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Wall'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner')
 		]);
 
 		console.log('All game object models preloaded');
@@ -129,8 +131,8 @@ export class Scene {
 
 	public async addFloor(position: THREE.Vector3) {
 		const model = await this.modelLoader.loadModel(
-			'/VIQRC-MixAndMatch-H2H-_-GameObjects_Floor.obj',
-			'/VIQRC-MixAndMatch-H2H-_-Common.mtl',
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Floor.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
 			'Floor'
 		);
 
@@ -147,8 +149,8 @@ export class Scene {
 
 	public async addWall(position: THREE.Vector3, rotation: number) {
 		const model = await this.modelLoader.loadModel(
-			'/VIQRC-MixAndMatch-H2H-_-GameObjects_Wall.obj',
-			'/VIQRC-MixAndMatch-H2H-_-Common.mtl',
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
 			'Wall'
 		);
 		const wall = new WallObject(model);
@@ -163,8 +165,8 @@ export class Scene {
 
 	public async addCorner(position: THREE.Vector3, rotation: number) {
 		const model = await this.modelLoader.loadModel(
-			'/VIQRC-MixAndMatch-H2H-_-GameObjects_Corner.obj',
-			'/VIQRC-MixAndMatch-H2H-_-Common.mtl',
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
 			'Corner'
 		);
 		const corner = new CornerObject(model);
