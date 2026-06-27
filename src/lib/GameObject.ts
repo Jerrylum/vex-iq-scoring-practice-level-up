@@ -137,6 +137,18 @@ export class GoalObject extends GameObject {
 	}
 }
 
+export class BeanBagObject extends GameObject {
+	constructor(model: THREE.Group, color: string, instanceId: number) {
+		super(model, `${color}BeanBag_${instanceId}`);
+		this.prepareModel();
+	}
+
+	protected override prepareModel(): void {
+		this.model.position.y = 113;
+		super.prepareModel();
+	}
+}
+
 export class Field extends GameObject {
 	constructor(model: THREE.Group) {
 		super(model, 'Field');

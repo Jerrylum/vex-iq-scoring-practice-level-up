@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const inputFile = join(__dirname, 'static', 'VIQRC-LevelUp-H2H-_-GameObjects_LoadZone.obj');
-const outputFile = join(__dirname, 'static', 'VIQRC-LevelUp-H2H-_-GameObjects_LoadZone-l.obj');
+const inputFile = join(__dirname, 'static', 'VIQRC-LevelUp-H2H-_-BeanBag v1.obj');
+const outputFile = join(__dirname, 'static', 'VIQRC-LevelUp-H2H-_-BeanBag v1-light.obj');
 
 console.log('Reading file:', inputFile);
 const content = readFileSync(inputFile, 'utf-8');

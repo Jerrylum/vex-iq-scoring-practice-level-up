@@ -3,6 +3,9 @@
 newmtl MyColor
 Kd 0.796078 0.000000 0.160784
 
+newmtl TextColor
+Kd 1.000000 1.000000 1.000000
+
 newmtl Goal_Gray
 Kd 0.360784 0.396078 0.431373
 

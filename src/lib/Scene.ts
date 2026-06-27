@@ -10,7 +10,8 @@ import {
 	CornerObject,
 	L4StructureObject,
 	L4BaseObject,
-	GoalObject
+	GoalObject,
+	BeanBagObject
 } from './GameObject';
 import { Renderer } from './Renderer';
 
@@ -19,7 +20,8 @@ export type PinColor = 'red' | 'blue' | 'orange';
 const colorName = {
 	red: 'Red',
 	blue: 'Blue',
-	orange: 'Orange'
+	orange: 'Orange',
+	yellow: 'Yellow'
 };
 
 export class Scene {
@@ -34,6 +36,11 @@ export class Scene {
 		['orange', 0]
 	]);
 	private beamCounter: number = 0;
+	private beanBagCounter: Map<'red' | 'blue' | 'yellow', number> = new Map([
+		['red', 0],
+		['blue', 0],
+		['yellow', 0]
+	]);
 
 	constructor(containerId: string) {
 		this.renderer = new Renderer(containerId);
@@ -137,6 +144,10 @@ export class Scene {
 		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.25, 0, ft * -3.5));
 		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.75, 0, ft * -3.5));
 
+		this.addBeanBag('red', new THREE.Vector3(0, 0, ft * 0.5));
+		this.addBeanBag('yellow', new THREE.Vector3(0, 0, 0));
+		this.addBeanBag('blue', new THREE.Vector3(0, 0, ft * -0.5));
+
 		const maxDim = 1600;
 
 		this.renderer.setCameraView(new THREE.Vector3(1600, 1600, 0), new THREE.Vector3(0, 0, 0));
@@ -164,6 +175,11 @@ export class Scene {
 				'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
 				'/VIQRC-LevelUp-H2H-_-Common.mtl',
 				'Beam10x2 Gray'
+			),
+			this.modelLoader.loadModel(
+				'/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj',
+				'/VIQRC-LevelUp-H2H-_-ColorRed.mtl',
+				'BeanBag Red'
 			)
 		]);
 
@@ -243,6 +259,31 @@ export class Scene {
 
 		console.log('Added 10x2 gray beam at', position);
 		return beam;
+	}
+
+	public async addBeanBag(
+		color: 'red' | 'blue' | 'yellow',
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeanBagObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`BeanBag ${colorName[color]}`
+		);
+
+		const instanceId = this.beanBagCounter.get(color)!;
+		this.beanBagCounter.set(color, instanceId + 1);
+
+		const beanBag = new BeanBagObject(model, color, instanceId);
+		beanBag.setPosition(position);
+		beanBag.setRotation(rotation);
+
+		this.renderer.scene.add(beanBag.getObject());
+		this.gameObjects.push(beanBag);
+
+		console.log(`Added ${color} bean bag at`, position);
+		return beanBag;
 	}
 
 	public async addFloor(position: THREE.Vector3) {
@@ -352,6 +393,9 @@ export class Scene {
 		this.pinCounter.set('blue', 0);
 		this.pinCounter.set('orange', 0);
 		this.beamCounter = 0;
+		this.beanBagCounter.set('red', 0);
+		this.beanBagCounter.set('blue', 0);
+		this.beanBagCounter.set('yellow', 0);
 	}
 
 	public getGameObjects(): GameObject[] {
