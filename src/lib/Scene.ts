@@ -154,8 +154,8 @@ export class Scene {
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Floor.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Floor'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Wall'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner'),
-			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Structure.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Structure'),
-			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_L4Structure.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Structure'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_L4Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj', '/VIQRC-LevelUp-H2H-_-ColorRed.mtl', 'Goal Red'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Goal Blue'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Beam12x2 Blue'),
@@ -308,7 +308,7 @@ export class Scene {
 	}
 
 	public async addL4Base(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
-		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base');
+		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_L4Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base');
 		const l4Base = new L4BaseObject(model);
 		l4Base.setPosition(position);
 		l4Base.setRotation(rotation);
@@ -321,7 +321,7 @@ export class Scene {
 
 	public async addL4Structure(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
 		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-L4-Structure.obj',
+			'/VIQRC-LevelUp-H2H-_-GameObjects_L4Structure.obj',
 			'/VIQRC-LevelUp-H2H-_-Common.mtl',
 			'L4 Structure'
 		);
