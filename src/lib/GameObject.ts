@@ -95,59 +95,30 @@ export class CornerObject extends GameObject {
 	}
 }
 
-export class FloorGoalSheetObject extends GameObject {
+export class L4StructureObject extends GameObject {
 	constructor(model: THREE.Group) {
-		super(model, `FloorGoalSheet_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-}
-
-export class StandoffGoalObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `StandoffGoal_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-}
-
-export class LoadZoneObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `LoadZone_${Math.random().toString(36).substring(2, 15)}`);
+		super(model, `L4Structure_${Math.random().toString(36).substring(2, 15)}`);
 		this.prepareModel();
 	}
 
 	protected override prepareModel(): void {
-		// Rotate the model to correct orientation
 		this.model.rotation.x = -Math.PI / 2;
-
+		// this.model.rotation.z = +Math.PI / 2;
+		this.model.position.y = 113;
 		super.prepareModel();
 	}
 }
 
-export class StartingPinSupportObject extends GameObject {
+export class L4BaseObject extends GameObject {
 	constructor(model: THREE.Group) {
-		super(model, `StartingPinSupport_${Math.random().toString(36).substring(2, 15)}`);
+		super(model, 'L4Base');
 		this.prepareModel();
 	}
 
 	protected override prepareModel(): void {
-		// Rotate the model to correct orientation
-		this.model.rotation.x = -Math.PI;
-
+		this.model.rotation.y = +Math.PI / 2;
+		this.model.position.y = 113;
 		super.prepareModel();
-	}
-}
-
-export class TriangleGoalObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `TriangleGoal_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-}
-
-export class SquareGoalObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `SquareGoal_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
 	}
 }
 

@@ -7,7 +7,9 @@ import {
 	GameObject,
 	FloorObject,
 	WallObject,
-	CornerObject
+	CornerObject,
+	L4StructureObject,
+	L4BaseObject
 } from './GameObject';
 import { Renderer } from './Renderer';
 
@@ -95,7 +97,13 @@ export class Scene {
 		this.addCorner(new THREE.Vector3(-2.75 * ft - 20, -126, +3.75 * ft + 20), 270);
 		this.addCorner(new THREE.Vector3(+2.75 * ft + 20, -126, +3.75 * ft + 20), 0);
 
-		// TODO: Level Up field elements
+		this.addL4Base(new THREE.Vector3(ft / 2, 0, ft));
+		this.addL4Base(new THREE.Vector3(-ft / 2, 0, ft));
+		this.addL4Base(new THREE.Vector3(ft / 2, 0, -ft));
+		this.addL4Base(new THREE.Vector3(-ft / 2, 0, -ft));
+
+		this.addL4Structure(new THREE.Vector3(-ft - 25.4 * 2, 0, ft), new THREE.Euler(0, Math.PI / 2, 0));
+		this.addL4Structure(new THREE.Vector3(ft + 25.4 * 2, 0, -ft), new THREE.Euler(0, -Math.PI / 2, 0));
 
 		const maxDim = 1600;
 
@@ -113,7 +121,9 @@ export class Scene {
 		await Promise.all([
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Floor.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Floor'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Wall'),
-			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner')
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Corner.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Corner'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Structure.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Structure'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base')
 		]);
 
 		console.log('All game object models preloaded');
@@ -148,11 +158,7 @@ export class Scene {
 	}
 
 	public async addWall(position: THREE.Vector3, rotation: number) {
-		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj',
-			'/VIQRC-LevelUp-H2H-_-Common.mtl',
-			'Wall'
-		);
+		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Wall.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Wall');
 		const wall = new WallObject(model);
 		wall.setPosition(position);
 		wall.setRotation(new THREE.Euler(0, (rotation * Math.PI) / 180, 0));
@@ -179,34 +185,32 @@ export class Scene {
 		return corner;
 	}
 
-	public async addFloorGoalSheet(position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up floor goal sheet assets
-		throw new Error('Not implemented: Level Up floor goal sheet assets');
+	public async addL4Base(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
+		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-L4-Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base');
+		const l4Base = new L4BaseObject(model);
+		l4Base.setPosition(position);
+		l4Base.setRotation(rotation);
+
+		this.renderer.scene.add(l4Base.getObject());
+		this.fieldObjects.push(l4Base);
+		console.log('Added L4 base at', position);
+		return l4Base;
 	}
 
-	public async addStandoffGoal(position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up standoff goal assets
-		throw new Error('Not implemented: Level Up standoff goal assets');
-	}
+	public async addL4Structure(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-L4-Structure.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
+			'L4 Structure'
+		);
+		const l4Structure = new L4StructureObject(model);
+		l4Structure.setPosition(position);
+		l4Structure.setRotation(rotation);
 
-	public async addLoadZone(color: PinColor, position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up load zone assets
-		throw new Error('Not implemented: Level Up load zone assets');
-	}
-
-	public async addStartingPinSupport(color: PinColor, position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up starting pin support assets
-		throw new Error('Not implemented: Level Up starting pin support assets');
-	}
-
-	public async addTriangleGoal(color: PinColor, position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up triangle goal assets
-		throw new Error('Not implemented: Level Up triangle goal assets');
-	}
-
-	public async addSquareGoal(color: PinColor, position: THREE.Vector3, rotation: number) {
-		// TODO: Level Up square goal assets
-		throw new Error('Not implemented: Level Up square goal assets');
+		this.renderer.scene.add(l4Structure.getObject());
+		this.fieldObjects.push(l4Structure);
+		console.log('Added L4 structure at', position);
+		return l4Structure;
 	}
 
 	public removeGameObject(gameObject: GameObject): void {
