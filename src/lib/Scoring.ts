@@ -52,6 +52,15 @@ export function calculateScenarioPoints(scoring: StructureScoring): number {
 	return total;
 }
 
+export function aggregateStructureScorings(structures: StructureScoring[]): StructureScoring {
+	return structures.reduce((total, scoring) => {
+		for (const key of Object.keys(total) as (keyof StructureScoring)[]) {
+			total[key] += scoring[key];
+		}
+		return total;
+	}, emptyStructureScoring());
+}
+
 export function isNotTouching(e: ScoringObject): boolean {
 	return !e.robot1Contacted && !e.robot2Contacted;
 }
