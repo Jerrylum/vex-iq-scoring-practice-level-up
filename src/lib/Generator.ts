@@ -105,7 +105,7 @@ function buildL4MixedStack(): Stack {
 }
 
 function buildPyramidMixedStack(alliance: AllianceColor): Stack {
-	return [...generateBeanBags(alliance, 2, 3), ...generateRandomOtherColor(alliance, 1, 3)];
+	return [...generateBeanBags(alliance, 2, 4), ...generateRandomOtherColor(alliance, 1, 3)];
 }
 
 function generateRandomPyramidGoalStructureCase<T>(
@@ -134,14 +134,14 @@ function generateRandomPyramidGoalStructureCase<T>(
 		if (roll < 0.4) {
 			return factories.one([createBeanBag(alliance)]);
 		}
-		return factories.multiple(generateBeanBags(alliance, 2, 3));
+		return factories.multiple(generateBeanBags(alliance, 2, 4));
 	}
 
 	if (roll < 0.2) {
 		return factories.one([createBeanBag(alliance)]);
 	}
 	if (roll < 0.4) {
-		return factories.multiple(generateBeanBags(alliance, 2, 3));
+		return factories.multiple(generateBeanBags(alliance, 2, 4));
 	}
 	return factories.mixed(buildPyramidMixedStack(alliance));
 }

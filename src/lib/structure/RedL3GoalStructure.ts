@@ -82,8 +82,8 @@ export class RedL3MultipleBeanBagsCase extends RedL3GoalCase {
 
 	constructor(stack: Stack) {
 		super();
-		if (stack.length < 2 || stack.length > 3) {
-			throw new Error('RedL3MultipleBeanBagsCase requires 2-3 bean bags');
+		if (stack.length < 2 || stack.length > 4) {
+			throw new Error('RedL3MultipleBeanBagsCase requires 2-4 bean bags');
 		}
 		this.stack = stack;
 	}
