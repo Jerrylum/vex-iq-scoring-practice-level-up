@@ -68,11 +68,11 @@ export function isScoredColorForL4Goal(color: BeanBagColor): boolean {
 	return color === 'yellow';
 }
 
-export function countScoredInRedPyramidGoal(beanBags: BeanBag[]): number {
+export function countScoredBeanBagsForRedGoal(beanBags: BeanBag[]): number {
 	return beanBags.filter((bag) => isScoredColorForRedGoal(bag.color)).length;
 }
 
-export function countScoredInBluePyramidGoal(beanBags: BeanBag[]): number {
+export function countScoredBeanBagsForBlueGoal(beanBags: BeanBag[]): number {
 	return beanBags.filter((bag) => isScoredColorForBlueGoal(bag.color)).length;
 }
 
@@ -81,7 +81,19 @@ export function countScoredInL4Goal(beanBags: BeanBag[]): number {
 }
 
 export function scoringForRedL3Goal(beanBags: BeanBag[]): StructureScoring {
-	return { ...emptyStructureScoring(), redL3Goal: countScoredInRedPyramidGoal(beanBags) };
+	return { ...emptyStructureScoring(), redL3Goal: countScoredBeanBagsForRedGoal(beanBags) };
+}
+
+export function scoringForRedL2Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), redL2Goal: countScoredBeanBagsForRedGoal(beanBags) };
+}
+
+export function scoringForRedL1Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), redL1Goal: countScoredBeanBagsForRedGoal(beanBags) };
+}
+
+export function scoringForRedFloorGoal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), redFloorGoal: countScoredBeanBagsForRedGoal(beanBags) };
 }
 
 export function scoringForL4Goal(beanBags: BeanBag[]): StructureScoring {

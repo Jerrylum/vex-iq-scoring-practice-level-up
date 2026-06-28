@@ -1,7 +1,16 @@
 import { type BeanBag, type Structure } from './ScoringObject.js';
-import { generateRandomL4GoalStructureCase, generateRandomRedL3GoalStructureCase } from './Generator.js';
+import {
+	generateRandomL4GoalStructureCase,
+	generateRandomRedFloorGoalStructureCase,
+	generateRandomRedL1GoalStructureCase,
+	generateRandomRedL2GoalStructureCase,
+	generateRandomRedL3GoalStructureCase
+} from './Generator.js';
 import { Scenario } from './Scenario.js';
 import { L4GoalStructure } from './structure/L4GoalStructure.js';
+import { RedFloorGoalStructure } from './structure/RedFloorGoalStructure.js';
+import { RedL1GoalStructure } from './structure/RedL1GoalStructure.js';
+import { RedL2GoalStructure } from './structure/RedL2GoalStructure.js';
 import { RedL3GoalStructure } from './structure/RedL3GoalStructure.js';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
@@ -91,6 +100,27 @@ export class ScenarioGenerator {
 		);
 	}
 
+	private generateRedL2Goal(): RedL2GoalStructure | null {
+		return this.generateStructure(
+			() => generateRandomRedL2GoalStructureCase(this.difficulty),
+			(caseData) => new RedL2GoalStructure(caseData, Math.floor(Math.random() * 1000000000))
+		);
+	}
+
+	private generateRedL1Goal(): RedL1GoalStructure | null {
+		return this.generateStructure(
+			() => generateRandomRedL1GoalStructureCase(this.difficulty),
+			(caseData) => new RedL1GoalStructure(caseData, Math.floor(Math.random() * 1000000000))
+		);
+	}
+
+	private generateRedFloorGoal(): RedFloorGoalStructure | null {
+		return this.generateStructure(
+			() => generateRandomRedFloorGoalStructureCase(this.difficulty),
+			(caseData) => new RedFloorGoalStructure(caseData, Math.floor(Math.random() * 1000000000))
+		);
+	}
+
 	public generate(): Scenario {
 		const l4Goal = this.generateL4Goal();
 		if (!l4Goal) {
@@ -104,7 +134,25 @@ export class ScenarioGenerator {
 		}
 		console.log('Generated: RedL3Goal');
 
-		const scenario = new Scenario(l4Goal, redL3Goal);
+		const redL2Goal = this.generateRedL2Goal();
+		if (!redL2Goal) {
+			throw new Error('Failed to generate RedL2Goal');
+		}
+		console.log('Generated: RedL2Goal');
+
+		const redL1Goal = this.generateRedL1Goal();
+		if (!redL1Goal) {
+			throw new Error('Failed to generate RedL1Goal');
+		}
+		console.log('Generated: RedL1Goal');
+
+		const redFloorGoal = this.generateRedFloorGoal();
+		if (!redFloorGoal) {
+			throw new Error('Failed to generate RedFloorGoal');
+		}
+		console.log('Generated: RedFloorGoal');
+
+		const scenario = new Scenario(l4Goal, redL3Goal, redL2Goal, redL1Goal, redFloorGoal);
 		console.log('Resources remaining:', this.tracker.getAvailable());
 		console.log(`Total structures generated: ${scenario.structures.length}`);
 

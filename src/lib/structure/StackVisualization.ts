@@ -16,6 +16,48 @@ const ROTATION_VARIANCE = 0.25;
 export const L4_STACK_POSITIONS = [new THREE.Vector3(FT * 0.5, 605, FT), new THREE.Vector3(-FT * 0.5, 605, -FT)];
 
 export const RED_L3_STACK_POSITION = new THREE.Vector3(-FT * 2.75, 200, FT * 3.75);
+export const RED_L2_STACK_POSITION = new THREE.Vector3(-FT * 2.5, 128, FT * 3.2);
+export const RED_L1_STACK_POSITION = new THREE.Vector3(-FT * 2, 68, FT * 2.7);
+export const RED_FLOOR_STACK_POSITIONS = [
+	new THREE.Vector3(-FT, 0, FT * 3.8),
+	new THREE.Vector3(0, 0, FT * 3.8),
+	new THREE.Vector3(FT, 0, FT * 3.8)
+];
+
+export type InvalidFloorPlacementVariant = 'offset' | 'rotated';
+
+export function getInvalidFloorPlacement(
+	base: THREE.Vector3,
+	variant: InvalidFloorPlacementVariant,
+	random: () => number
+): { position: THREE.Vector3; rotation: THREE.Euler } {
+	if (variant === 'offset') {
+		return {
+			position: new THREE.Vector3(base.x, base.y, base.z - 45),
+			rotation: new THREE.Euler((random() - 0.5) * ROTATION_VARIANCE, random() * Math.PI * 2, (random() - 0.5) * ROTATION_VARIANCE)
+		};
+	}
+
+	return {
+		position: new THREE.Vector3(base.x, 0, FT * 3.7),
+		rotation: new THREE.Euler(-Math.PI / 4, Math.PI / 2, 0)
+	};
+}
+
+export async function visualizeSingleBeanBag(
+	scene: Scene,
+	basePosition: THREE.Vector3,
+	bag: BeanBag,
+	seed: number,
+	rotationOverride?: THREE.Euler
+): Promise<void> {
+	const random = mulberry32(seed);
+	const position = new THREE.Vector3(basePosition.x + jitter(random), basePosition.y, basePosition.z + jitter(random));
+	const rotation =
+		rotationOverride ?? new THREE.Euler((random() - 0.5) * ROTATION_VARIANCE, random() * Math.PI * 2, (random() - 0.5) * ROTATION_VARIANCE);
+
+	await scene.addBeanBag(bag.color, position, rotation);
+}
 
 interface StackSlot {
 	x: number;
