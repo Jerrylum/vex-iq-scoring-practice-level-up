@@ -26,6 +26,7 @@
 	let loadingMessage = $state('Loading scene...');
 	let isPanelCollapsed = $state(false);
 	let showAnswer = $state(false);
+	let showHowToPlayDialog = $state(false);
 
 	let userCounts = $state<StructureScoring>(emptyStructureScoring());
 	let actualCounts = $state<StructureScoring>(emptyStructureScoring());
@@ -50,6 +51,10 @@
 
 	function toggleAnswer() {
 		showAnswer = !showAnswer;
+	}
+
+	function toggleHowToPlayDialog() {
+		showHowToPlayDialog = !showHowToPlayDialog;
 	}
 
 	function incrementCount(field: ScoringField) {
@@ -160,7 +165,19 @@
 
 		{#if !isPanelCollapsed}
 			<div class="flex-none border-b border-[#374151] bg-[#111827] p-3">
-				<h2 class="text-lg font-bold">Scoring Panel</h2>
+				<div class="flex items-center justify-between">
+					<h2 class="text-lg font-bold">Scoring Panel</h2>
+					<div class="flex gap-2">
+						<button
+							class="rounded-md bg-[#0076BB] px-2 py-1 text-xs hover:bg-[#005a91]"
+							onclick={toggleHowToPlayDialog}
+							aria-label="How to Play"
+						>
+							?
+						</button>
+						<button class="rounded-md bg-[#888B95] px-2 py-1 text-xs hover:bg-[#6b6e76] md:hidden" onclick={togglePanel}> Close </button>
+					</div>
+				</div>
 
 				<div class="mt-3 flex gap-2">
 					<select
@@ -323,4 +340,96 @@
 			</div>
 		{/if}
 	</div>
+
+	{#if showHowToPlayDialog}
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+			onclick={toggleHowToPlayDialog}
+			onkeydown={(e) => e.key === 'Escape' && toggleHowToPlayDialog()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="dialog-title"
+			tabindex="-1"
+		>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-[#1f2937] p-6 text-white shadow-2xl"
+				onclick={(e) => e.stopPropagation()}
+			>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 id="dialog-title" class="text-2xl font-bold">How to Play</h2>
+					<button
+						class="flex h-8 w-8 items-center justify-center rounded-md bg-[#374151] text-xl hover:bg-[#4b5563]"
+						onclick={toggleHowToPlayDialog}
+						aria-label="Close dialog"
+					>
+						×
+					</button>
+				</div>
+
+				<div class="space-y-4 text-sm leading-relaxed">
+					<section>
+						<h3 class="mb-2 text-lg font-semibold text-[#0076BB]">Getting Started</h3>
+						<p>
+							Select a difficulty level (Easy, Medium, or Hard) and click the <strong>"New"</strong> button to generate a random field scenario.
+							Examine the 3D field and count scored bean bags for each goal tier using the scoring panel.
+						</p>
+					</section>
+
+					<section>
+						<h3 class="mb-2 text-lg font-semibold text-[#0076BB]">Scoring</h3>
+						<ul class="ml-4 list-disc space-y-1">
+							<li><strong>Floor Goal:</strong> 1 pt per scored bean bag</li>
+							<li><strong>L1 Goal:</strong> 3 pts per scored bean bag</li>
+							<li><strong>L2 Goal:</strong> 6 pts per scored bean bag</li>
+							<li><strong>L3 Goal:</strong> 12 pts per scored bean bag</li>
+							<li><strong>L4 Goal:</strong> 16 pts per scored yellow bean bag</li>
+						</ul>
+						<p class="mt-2">
+							In red and blue goals, matching-color and yellow bean bags score. On the L4 goal, only yellow bean bags score.
+						</p>
+					</section>
+
+					<section>
+						<h3 class="mb-2 text-lg font-semibold text-[#0076BB]">Controls</h3>
+						<ul class="ml-4 list-disc space-y-1">
+							<li><strong>Left Click + Drag:</strong> Rotate camera</li>
+							<li><strong>Right Click + Drag:</strong> Pan camera</li>
+							<li><strong>Scroll Wheel:</strong> Zoom in/out</li>
+							<li><strong>Touch:</strong> Pinch to zoom, drag to rotate</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3 class="mb-2 text-lg font-semibold text-[#0076BB]">Checking Your Score</h3>
+						<p>
+							After counting scored bean bags for each goal, click the <strong>"Check"</strong> button to see if your total matches the correct
+							score. The correct count for each goal will be displayed, helping you learn what you might have missed.
+						</p>
+					</section>
+
+					<section class="border-t border-[#374151] pt-4">
+						<h3 class="mb-2 text-lg font-semibold text-[#0076BB]">About</h3>
+						<p class="mb-2">
+							This project is open source and available on GitHub:
+							<a
+								href="https://github.com/Jerrylum/vex-iq-scoring-practice-level-up"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-[#60a5fa] hover:underline"
+							>
+								Jerrylum/vex-iq-scoring-practice-level-up
+							</a>
+						</p>
+						<p class="text-xs text-[#888B95]">
+							This project is licensed under the GNU General Public License v3.0 (GPLv3). VEX IQ is a trademark of Innovation First
+							International, Inc.
+						</p>
+					</section>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
