@@ -77,7 +77,7 @@
 
 		actualCounts = aggregateStructureScorings(scenario.calculateScoring().structures);
 		console.log(`\n=== Scenario generation complete: ${scenario.structures.length} structures created ===\n`);
-		console.log('Actual counts:', actualCounts);
+		console.log('Actual counts:', $state.snapshot(actualCounts));
 	}
 
 	async function reloadScenario() {
