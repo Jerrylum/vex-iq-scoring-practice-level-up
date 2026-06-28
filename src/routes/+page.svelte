@@ -127,11 +127,12 @@
 
 		{#if isLoading}
 			<div
-				id="loading"
-				class="absolute top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 text-lg text-white"
+				class="absolute top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 p-4 text-center text-lg text-white"
 				class:text-red-500={loadingMessage.includes('Failed')}
 			>
-				{loadingMessage}
+				<div id="loading" class="mx-auto w-full max-w-md rounded-lg bg-black/50 p-4">
+					{loadingMessage}
+				</div>
 			</div>
 		{/if}
 
