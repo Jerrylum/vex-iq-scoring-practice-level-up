@@ -6,7 +6,7 @@ This project simplifies some edge cases for learning, but works well as a starti
 
 **Available at:** [vex-iq-scoring.jerryio.com](https://vex-iq-scoring.jerryio.com)
 
-![VEX IQ Scoring Practice — Level Up Screenshot](docs/web-app-screenshot.png)
+![VEX IQ Scoring Practice — Level Up Screenshot](docs/web-app-screenshot-2627.png)
 
 ## How to Play
 
