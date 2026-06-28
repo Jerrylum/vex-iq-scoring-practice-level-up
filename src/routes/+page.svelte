@@ -269,7 +269,7 @@
 				{/each}
 
 				<div class="flex justify-center">
-					<div class="flex w-full max-w-[12rem] flex-col gap-2 rounded-lg bg-[#374151] p-2 shadow-md">
+					<div class="flex w-full max-w-48 flex-col gap-2 rounded-lg bg-[#374151] p-2 shadow-md">
 						<div class="flex items-center gap-2 text-[10px] leading-tight">
 							<span class="font-medium text-yellow-300">L4 Goal</span>
 							<span class="text-[#888B95]">{GOAL_POINTS.yellowL4Goal} pts</span>
