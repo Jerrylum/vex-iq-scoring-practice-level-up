@@ -24,22 +24,37 @@ export const RED_FLOOR_STACK_POSITIONS = [
 	new THREE.Vector3(FT, 0, FT * 3.8)
 ];
 
+export const BLUE_L3_STACK_POSITION = new THREE.Vector3(FT * 2.75, 200, -FT * 3.75);
+export const BLUE_L2_STACK_POSITION = new THREE.Vector3(FT * 2.5, 128, -FT * 3.2);
+export const BLUE_L1_STACK_POSITION = new THREE.Vector3(FT * 2, 68, -FT * 2.7);
+export const BLUE_FLOOR_STACK_POSITIONS = [
+	new THREE.Vector3(FT, 0, -FT * 3.8),
+	new THREE.Vector3(0, 0, -FT * 3.8),
+	new THREE.Vector3(-FT, 0, -FT * 3.8)
+];
+
+export type FloorGoalSide = 'red' | 'blue';
+
 export type InvalidFloorPlacementVariant = 'offset' | 'rotated';
 
 export function getInvalidFloorPlacement(
 	base: THREE.Vector3,
 	variant: InvalidFloorPlacementVariant,
-	random: () => number
+	random: () => number,
+	side: FloorGoalSide = 'red'
 ): { position: THREE.Vector3; rotation: THREE.Euler } {
+	const randomRotation = () =>
+		new THREE.Euler((random() - 0.5) * ROTATION_VARIANCE, random() * Math.PI * 2, (random() - 0.5) * ROTATION_VARIANCE);
+
 	if (variant === 'offset') {
 		return {
-			position: new THREE.Vector3(base.x, base.y, base.z - 45),
-			rotation: new THREE.Euler((random() - 0.5) * ROTATION_VARIANCE, random() * Math.PI * 2, (random() - 0.5) * ROTATION_VARIANCE)
+			position: new THREE.Vector3(base.x, base.y, side === 'red' ? base.z - 45 : base.z + 45),
+			rotation: randomRotation()
 		};
 	}
 
 	return {
-		position: new THREE.Vector3(base.x, 0, FT * 3.7),
+		position: new THREE.Vector3(base.x, 0, side === 'red' ? FT * 3.7 : -FT * 3.7),
 		rotation: new THREE.Euler(-Math.PI / 4, Math.PI / 2, 0)
 	};
 }

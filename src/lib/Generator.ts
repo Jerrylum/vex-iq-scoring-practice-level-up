@@ -1,6 +1,35 @@
 import { BlueBeanBag, RedBeanBag, YellowBeanBag, type BeanBag } from './ScoringObject';
 import type { BeanBagColor } from './Scene';
 import {
+	BlueL1MultipleBeanBagsCase,
+	BlueL1MultipleMixedColorBeanBagsCase,
+	BlueL1NoBeanBagCase,
+	BlueL1OneBeanBagCase,
+	type BlueL1GoalCase
+} from './structure/BlueL1GoalStructure';
+import {
+	BlueL2MultipleBeanBagsCase,
+	BlueL2MultipleMixedColorBeanBagsCase,
+	BlueL2NoBeanBagCase,
+	BlueL2OneBeanBagCase,
+	type BlueL2GoalCase
+} from './structure/BlueL2GoalStructure';
+import {
+	BlueL3MultipleBeanBagsCase,
+	BlueL3MultipleMixedColorBeanBagsCase,
+	BlueL3NoBeanBagCase,
+	BlueL3OneBeanBagCase,
+	type BlueL3GoalCase
+} from './structure/BlueL3GoalStructure';
+import {
+	BlueFloorGoalInvalidPlacementCase,
+	BlueFloorGoalMultipleBeanBagsCase,
+	BlueFloorGoalMultipleMixedColorBeanBagsCase,
+	BlueFloorGoalNoBeanBagCase,
+	BlueFloorGoalOneBeanBagCase,
+	type BlueFloorGoalCase
+} from './structure/BlueFloorGoalStructure';
+import {
 	L4MultipleBeanBagsCase,
 	L4MultipleMixedColorBeanBagsCase,
 	L4NoBeanBagCase,
@@ -40,6 +69,7 @@ import {
 import type { Stack } from './structure/StackVisualization';
 
 export type Level = 'easy' | 'medium' | 'hard';
+type AllianceColor = 'red' | 'blue';
 
 function createBeanBag(color: BeanBagColor): BeanBag {
 	switch (color) {
@@ -74,12 +104,13 @@ function buildL4MixedStack(): Stack {
 	return [...generateBeanBags('yellow', 2, 3), ...generateRandomOtherColor('yellow', 1, 2)];
 }
 
-function buildRedPyramidMixedStack(): Stack {
-	return [...generateBeanBags('red', 2, 3), ...generateRandomOtherColor('red', 1, 3)];
+function buildPyramidMixedStack(alliance: AllianceColor): Stack {
+	return [...generateBeanBags(alliance, 2, 3), ...generateRandomOtherColor(alliance, 1, 3)];
 }
 
-function generateRandomRedPyramidGoalStructureCase<T>(
+function generateRandomPyramidGoalStructureCase<T>(
 	level: Level,
+	alliance: AllianceColor,
 	factories: {
 		no: () => T;
 		one: (stack: Stack) => T;
@@ -93,7 +124,7 @@ function generateRandomRedPyramidGoalStructureCase<T>(
 		if (roll < 0.5) {
 			return factories.no();
 		}
-		return factories.one([createBeanBag(Math.random() < 0.5 ? 'red' : 'yellow')]);
+		return factories.one([createBeanBag(Math.random() < 0.5 ? alliance : 'yellow')]);
 	}
 
 	if (level === 'medium') {
@@ -101,18 +132,18 @@ function generateRandomRedPyramidGoalStructureCase<T>(
 			return factories.no();
 		}
 		if (roll < 0.4) {
-			return factories.one([createBeanBag('red')]);
+			return factories.one([createBeanBag(alliance)]);
 		}
-		return factories.multiple(generateBeanBags('red', 2, 3));
+		return factories.multiple(generateBeanBags(alliance, 2, 3));
 	}
 
 	if (roll < 0.2) {
-		return factories.one([createBeanBag('red')]);
+		return factories.one([createBeanBag(alliance)]);
 	}
 	if (roll < 0.4) {
-		return factories.multiple(generateBeanBags('red', 2, 3));
+		return factories.multiple(generateBeanBags(alliance, 2, 3));
 	}
-	return factories.mixed(buildRedPyramidMixedStack());
+	return factories.mixed(buildPyramidMixedStack(alliance));
 }
 
 function distributeBeanBagsAcrossStacks(bags: BeanBag[]): FloorStackPlacement[] {
@@ -134,12 +165,12 @@ function distributeBeanBagsAcrossStacks(bags: BeanBag[]): FloorStackPlacement[] 
 	return placements;
 }
 
-function buildFloorMixedPlacements(): FloorStackPlacement[] {
-	const bags = [...generateBeanBags('red', 2, 3), ...generateRandomOtherColor('red', 1, 3)];
+function buildFloorMixedPlacements(alliance: AllianceColor): FloorStackPlacement[] {
+	const bags = [...generateBeanBags(alliance, 2, 3), ...generateRandomOtherColor(alliance, 1, 3)];
 	return distributeBeanBagsAcrossStacks(bags);
 }
 
-function buildInvalidPlacementCase(): RedFloorGoalInvalidPlacementCase {
+function buildInvalidPlacementCase(alliance: AllianceColor): RedFloorGoalInvalidPlacementCase | BlueFloorGoalInvalidPlacementCase {
 	const placements: FloorStackPlacement[] = [];
 
 	for (let i = 0; i < 3; i++) {
@@ -147,7 +178,8 @@ function buildInvalidPlacementCase(): RedFloorGoalInvalidPlacementCase {
 
 		if (Math.random() < 0.3) {
 			const roll = Math.random();
-			const color: BeanBagColor = roll < 0.5 ? 'red' : roll < 0.75 ? 'blue' : 'yellow';
+			const color: BeanBagColor =
+				alliance === 'red' ? (roll < 0.5 ? 'red' : roll < 0.75 ? 'blue' : 'yellow') : roll < 0.5 ? 'blue' : roll < 0.75 ? 'red' : 'yellow';
 			placements.push({
 				positionIndex,
 				stack: [createBeanBag(color)],
@@ -155,14 +187,63 @@ function buildInvalidPlacementCase(): RedFloorGoalInvalidPlacementCase {
 				invalidVariant: Math.random() < 0.5 ? 'offset' : 'rotated'
 			});
 		} else {
-			const stack = [...generateBeanBags('red', 0, 2), ...generateRandomOtherColor('red', 0, 2)];
+			const stack = [...generateBeanBags(alliance, 0, 2), ...generateRandomOtherColor(alliance, 0, 2)];
 			if (stack.length > 0) {
 				placements.push({ positionIndex, stack, valid: true });
 			}
 		}
 	}
 
-	return new RedFloorGoalInvalidPlacementCase(placements);
+	return alliance === 'red' ? new RedFloorGoalInvalidPlacementCase(placements) : new BlueFloorGoalInvalidPlacementCase(placements);
+}
+
+function generateRandomFloorGoalStructureCase(alliance: AllianceColor): RedFloorGoalCase | BlueFloorGoalCase {
+	const roll = Math.random();
+
+	if (alliance === 'red') {
+		if (roll < 0.5) {
+			return new RedFloorGoalNoBeanBagCase();
+		}
+		return new RedFloorGoalOneBeanBagCase(Math.floor(Math.random() * 3) as 0 | 1 | 2, [createBeanBag('red')]);
+	}
+
+	if (roll < 0.5) {
+		return new BlueFloorGoalNoBeanBagCase();
+	}
+	return new BlueFloorGoalOneBeanBagCase(Math.floor(Math.random() * 3) as 0 | 1 | 2, [createBeanBag('blue')]);
+}
+
+function generateRandomFloorGoalStructureCaseMedium(alliance: AllianceColor): RedFloorGoalCase | BlueFloorGoalCase {
+	const roll = Math.random();
+
+	if (roll < 0.2) {
+		return alliance === 'red' ? new RedFloorGoalNoBeanBagCase() : new BlueFloorGoalNoBeanBagCase();
+	}
+	if (roll < 0.4) {
+		const positionIndex = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+		return alliance === 'red'
+			? new RedFloorGoalOneBeanBagCase(positionIndex, [createBeanBag('red')])
+			: new BlueFloorGoalOneBeanBagCase(positionIndex, [createBeanBag('blue')]);
+	}
+	return alliance === 'red'
+		? new RedFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('red', 2, 3)))
+		: new BlueFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('blue', 2, 3)));
+}
+
+function generateRandomFloorGoalStructureCaseHard(alliance: AllianceColor): RedFloorGoalCase | BlueFloorGoalCase {
+	const roll = Math.random();
+
+	if (roll < 0.2) {
+		return alliance === 'red'
+			? new RedFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('red', 2, 3)))
+			: new BlueFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('blue', 2, 3)));
+	}
+	if (roll < 0.6) {
+		return alliance === 'red'
+			? new RedFloorGoalMultipleMixedColorBeanBagsCase(buildFloorMixedPlacements('red'))
+			: new BlueFloorGoalMultipleMixedColorBeanBagsCase(buildFloorMixedPlacements('blue'));
+	}
+	return buildInvalidPlacementCase(alliance);
 }
 
 export function generateRandomL4GoalStructureCase(level: Level): L4GoalCase {
@@ -193,7 +274,7 @@ export function generateRandomL4GoalStructureCase(level: Level): L4GoalCase {
 }
 
 export function generateRandomRedL3GoalStructureCase(level: Level): RedL3GoalCase {
-	return generateRandomRedPyramidGoalStructureCase(level, {
+	return generateRandomPyramidGoalStructureCase(level, 'red', {
 		no: () => new RedL3NoBeanBagCase(),
 		one: (stack) => new RedL3OneBeanBagCase(stack),
 		multiple: (stack) => new RedL3MultipleBeanBagsCase(stack),
@@ -201,8 +282,17 @@ export function generateRandomRedL3GoalStructureCase(level: Level): RedL3GoalCas
 	});
 }
 
+export function generateRandomBlueL3GoalStructureCase(level: Level): BlueL3GoalCase {
+	return generateRandomPyramidGoalStructureCase(level, 'blue', {
+		no: () => new BlueL3NoBeanBagCase(),
+		one: (stack) => new BlueL3OneBeanBagCase(stack),
+		multiple: (stack) => new BlueL3MultipleBeanBagsCase(stack),
+		mixed: (stack) => new BlueL3MultipleMixedColorBeanBagsCase(stack)
+	});
+}
+
 export function generateRandomRedL2GoalStructureCase(level: Level): RedL2GoalCase {
-	return generateRandomRedPyramidGoalStructureCase(level, {
+	return generateRandomPyramidGoalStructureCase(level, 'red', {
 		no: () => new RedL2NoBeanBagCase(),
 		one: (stack) => new RedL2OneBeanBagCase(stack),
 		multiple: (stack) => new RedL2MultipleBeanBagsCase(stack),
@@ -210,8 +300,17 @@ export function generateRandomRedL2GoalStructureCase(level: Level): RedL2GoalCas
 	});
 }
 
+export function generateRandomBlueL2GoalStructureCase(level: Level): BlueL2GoalCase {
+	return generateRandomPyramidGoalStructureCase(level, 'blue', {
+		no: () => new BlueL2NoBeanBagCase(),
+		one: (stack) => new BlueL2OneBeanBagCase(stack),
+		multiple: (stack) => new BlueL2MultipleBeanBagsCase(stack),
+		mixed: (stack) => new BlueL2MultipleMixedColorBeanBagsCase(stack)
+	});
+}
+
 export function generateRandomRedL1GoalStructureCase(level: Level): RedL1GoalCase {
-	return generateRandomRedPyramidGoalStructureCase(level, {
+	return generateRandomPyramidGoalStructureCase(level, 'red', {
 		no: () => new RedL1NoBeanBagCase(),
 		one: (stack) => new RedL1OneBeanBagCase(stack),
 		multiple: (stack) => new RedL1MultipleBeanBagsCase(stack),
@@ -219,31 +318,31 @@ export function generateRandomRedL1GoalStructureCase(level: Level): RedL1GoalCas
 	});
 }
 
+export function generateRandomBlueL1GoalStructureCase(level: Level): BlueL1GoalCase {
+	return generateRandomPyramidGoalStructureCase(level, 'blue', {
+		no: () => new BlueL1NoBeanBagCase(),
+		one: (stack) => new BlueL1OneBeanBagCase(stack),
+		multiple: (stack) => new BlueL1MultipleBeanBagsCase(stack),
+		mixed: (stack) => new BlueL1MultipleMixedColorBeanBagsCase(stack)
+	});
+}
+
 export function generateRandomRedFloorGoalStructureCase(level: Level): RedFloorGoalCase {
-	const roll = Math.random();
-
 	if (level === 'easy') {
-		if (roll < 0.5) {
-			return new RedFloorGoalNoBeanBagCase();
-		}
-		return new RedFloorGoalOneBeanBagCase(Math.floor(Math.random() * 3) as 0 | 1 | 2, [createBeanBag('red')]);
+		return generateRandomFloorGoalStructureCase('red') as RedFloorGoalCase;
 	}
-
 	if (level === 'medium') {
-		if (roll < 0.2) {
-			return new RedFloorGoalNoBeanBagCase();
-		}
-		if (roll < 0.4) {
-			return new RedFloorGoalOneBeanBagCase(Math.floor(Math.random() * 3) as 0 | 1 | 2, [createBeanBag('red')]);
-		}
-		return new RedFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('red', 2, 3)));
+		return generateRandomFloorGoalStructureCaseMedium('red') as RedFloorGoalCase;
 	}
+	return generateRandomFloorGoalStructureCaseHard('red') as RedFloorGoalCase;
+}
 
-	if (roll < 0.2) {
-		return new RedFloorGoalMultipleBeanBagsCase(distributeBeanBagsAcrossStacks(generateBeanBags('red', 2, 3)));
+export function generateRandomBlueFloorGoalStructureCase(level: Level): BlueFloorGoalCase {
+	if (level === 'easy') {
+		return generateRandomFloorGoalStructureCase('blue') as BlueFloorGoalCase;
 	}
-	if (roll < 0.6) {
-		return new RedFloorGoalMultipleMixedColorBeanBagsCase(buildFloorMixedPlacements());
+	if (level === 'medium') {
+		return generateRandomFloorGoalStructureCaseMedium('blue') as BlueFloorGoalCase;
 	}
-	return buildInvalidPlacementCase();
+	return generateRandomFloorGoalStructureCaseHard('blue') as BlueFloorGoalCase;
 }

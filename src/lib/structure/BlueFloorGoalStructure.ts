@@ -1,27 +1,21 @@
 import { BeanBag, Structure, ScoringObject } from '../ScoringObject';
 import type { Scene } from '../Scene';
-import { emptyStructureScoring, scoringForRedFloorGoal, type StructureScoring } from '../Scoring';
+import { emptyStructureScoring, scoringForBlueFloorGoal, type StructureScoring } from '../Scoring';
 import { mulberry32 } from '../utils';
 import {
+	BLUE_FLOOR_STACK_POSITIONS,
 	getInvalidFloorPlacement,
-	RED_FLOOR_STACK_POSITIONS,
 	type InvalidFloorPlacementVariant,
 	type Stack,
 	visualizeStack
 } from './StackVisualization';
+import type { FloorStackPlacement } from './RedFloorGoalStructure';
 
-export interface FloorStackPlacement {
-	positionIndex: 0 | 1 | 2;
-	stack: Stack;
-	valid: boolean;
-	invalidVariant?: InvalidFloorPlacementVariant;
-}
-
-export class RedFloorGoalStructure extends Structure {
-	public readonly theCase: RedFloorGoalCase;
+export class BlueFloorGoalStructure extends Structure {
+	public readonly theCase: BlueFloorGoalCase;
 	public readonly randomSeed: number;
 
-	constructor(theCase: RedFloorGoalCase, randomSeed: number) {
+	constructor(theCase: BlueFloorGoalCase, randomSeed: number) {
 		super();
 		this.theCase = theCase;
 		this.randomSeed = randomSeed;
@@ -40,11 +34,11 @@ export class RedFloorGoalStructure extends Structure {
 	}
 }
 
-export abstract class RedFloorGoalCase {
+export abstract class BlueFloorGoalCase {
 	public abstract getPlacements(): FloorStackPlacement[];
 	public abstract getElements(): ScoringObject[];
 	public abstract getScoring(): StructureScoring;
-	public abstract visualize(scene: Scene, structure: RedFloorGoalStructure): Promise<void>;
+	public abstract visualize(scene: Scene, structure: BlueFloorGoalStructure): Promise<void>;
 }
 
 function scoredBeanBags(placements: FloorStackPlacement[]): BeanBag[] {
@@ -60,14 +54,14 @@ function scoredBeanBags(placements: FloorStackPlacement[]): BeanBag[] {
 	return bags;
 }
 
-async function visualizePlacements(scene: Scene, structure: RedFloorGoalStructure, placements: FloorStackPlacement[]): Promise<void> {
+async function visualizePlacements(scene: Scene, structure: BlueFloorGoalStructure, placements: FloorStackPlacement[]): Promise<void> {
 	for (let i = 0; i < placements.length; i++) {
 		const placement = placements[i];
 		if (!placement || placement.stack.length === 0) {
 			continue;
 		}
 
-		const base = RED_FLOOR_STACK_POSITIONS[placement.positionIndex]!;
+		const base = BLUE_FLOOR_STACK_POSITIONS[placement.positionIndex]!;
 		const seed = structure.randomSeed + i;
 
 		if (!placement.valid) {
@@ -78,7 +72,7 @@ async function visualizePlacements(scene: Scene, structure: RedFloorGoalStructur
 
 			const random = mulberry32(seed);
 			const variant = placement.invalidVariant ?? (random() < 0.5 ? 'offset' : 'rotated');
-			const { position, rotation } = getInvalidFloorPlacement(base, variant, random, 'red');
+			const { position, rotation } = getInvalidFloorPlacement(base, variant, random, 'blue');
 			await scene.addBeanBag(bag.color, position, rotation);
 			continue;
 		}
@@ -87,7 +81,7 @@ async function visualizePlacements(scene: Scene, structure: RedFloorGoalStructur
 	}
 }
 
-export class RedFloorGoalNoBeanBagCase extends RedFloorGoalCase {
+export class BlueFloorGoalNoBeanBagCase extends BlueFloorGoalCase {
 	public getPlacements(): FloorStackPlacement[] {
 		return [];
 	}
@@ -100,16 +94,16 @@ export class RedFloorGoalNoBeanBagCase extends RedFloorGoalCase {
 		return emptyStructureScoring();
 	}
 
-	public async visualize(_scene: Scene, _structure: RedFloorGoalStructure): Promise<void> {}
+	public async visualize(_scene: Scene, _structure: BlueFloorGoalStructure): Promise<void> {}
 }
 
-export class RedFloorGoalOneBeanBagCase extends RedFloorGoalCase {
+export class BlueFloorGoalOneBeanBagCase extends BlueFloorGoalCase {
 	private readonly placements: FloorStackPlacement[];
 
 	constructor(positionIndex: 0 | 1 | 2, stack: Stack) {
 		super();
 		if (stack.length !== 1) {
-			throw new Error('RedFloorGoalOneBeanBagCase requires exactly 1 bean bag');
+			throw new Error('BlueFloorGoalOneBeanBagCase requires exactly 1 bean bag');
 		}
 		this.placements = [{ positionIndex, stack, valid: true }];
 	}
@@ -123,22 +117,22 @@ export class RedFloorGoalOneBeanBagCase extends RedFloorGoalCase {
 	}
 
 	public getScoring(): StructureScoring {
-		return scoringForRedFloorGoal(scoredBeanBags(this.placements));
+		return scoringForBlueFloorGoal(scoredBeanBags(this.placements));
 	}
 
-	public async visualize(scene: Scene, structure: RedFloorGoalStructure): Promise<void> {
+	public async visualize(scene: Scene, structure: BlueFloorGoalStructure): Promise<void> {
 		await visualizePlacements(scene, structure, this.placements);
 	}
 }
 
-export class RedFloorGoalMultipleBeanBagsCase extends RedFloorGoalCase {
+export class BlueFloorGoalMultipleBeanBagsCase extends BlueFloorGoalCase {
 	private readonly placements: FloorStackPlacement[];
 
 	constructor(placements: FloorStackPlacement[]) {
 		super();
-		const totalRed = placements.flatMap((p) => p.stack).length;
-		if (totalRed < 2 || totalRed > 3) {
-			throw new Error('RedFloorGoalMultipleBeanBagsCase requires 2-3 red bean bags total');
+		const totalBlue = placements.flatMap((p) => p.stack).length;
+		if (totalBlue < 2 || totalBlue > 3) {
+			throw new Error('BlueFloorGoalMultipleBeanBagsCase requires 2-3 blue bean bags total');
 		}
 		this.placements = placements;
 	}
@@ -152,15 +146,15 @@ export class RedFloorGoalMultipleBeanBagsCase extends RedFloorGoalCase {
 	}
 
 	public getScoring(): StructureScoring {
-		return scoringForRedFloorGoal(scoredBeanBags(this.placements));
+		return scoringForBlueFloorGoal(scoredBeanBags(this.placements));
 	}
 
-	public async visualize(scene: Scene, structure: RedFloorGoalStructure): Promise<void> {
+	public async visualize(scene: Scene, structure: BlueFloorGoalStructure): Promise<void> {
 		await visualizePlacements(scene, structure, this.placements);
 	}
 }
 
-export class RedFloorGoalMultipleMixedColorBeanBagsCase extends RedFloorGoalCase {
+export class BlueFloorGoalMultipleMixedColorBeanBagsCase extends BlueFloorGoalCase {
 	private readonly placements: FloorStackPlacement[];
 
 	constructor(placements: FloorStackPlacement[]) {
@@ -177,15 +171,15 @@ export class RedFloorGoalMultipleMixedColorBeanBagsCase extends RedFloorGoalCase
 	}
 
 	public getScoring(): StructureScoring {
-		return scoringForRedFloorGoal(scoredBeanBags(this.placements));
+		return scoringForBlueFloorGoal(scoredBeanBags(this.placements));
 	}
 
-	public async visualize(scene: Scene, structure: RedFloorGoalStructure): Promise<void> {
+	public async visualize(scene: Scene, structure: BlueFloorGoalStructure): Promise<void> {
 		await visualizePlacements(scene, structure, this.placements);
 	}
 }
 
-export class RedFloorGoalInvalidPlacementCase extends RedFloorGoalCase {
+export class BlueFloorGoalInvalidPlacementCase extends BlueFloorGoalCase {
 	private readonly placements: FloorStackPlacement[];
 
 	constructor(placements: FloorStackPlacement[]) {
@@ -202,10 +196,10 @@ export class RedFloorGoalInvalidPlacementCase extends RedFloorGoalCase {
 	}
 
 	public getScoring(): StructureScoring {
-		return scoringForRedFloorGoal(scoredBeanBags(this.placements));
+		return scoringForBlueFloorGoal(scoredBeanBags(this.placements));
 	}
 
-	public async visualize(scene: Scene, structure: RedFloorGoalStructure): Promise<void> {
+	public async visualize(scene: Scene, structure: BlueFloorGoalStructure): Promise<void> {
 		await visualizePlacements(scene, structure, this.placements);
 	}
 }

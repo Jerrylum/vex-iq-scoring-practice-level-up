@@ -99,3 +99,19 @@ export function scoringForRedFloorGoal(beanBags: BeanBag[]): StructureScoring {
 export function scoringForL4Goal(beanBags: BeanBag[]): StructureScoring {
 	return { ...emptyStructureScoring(), yellowL4Goal: countScoredInL4Goal(beanBags) };
 }
+
+export function scoringForBlueL3Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), blueL3Goal: countScoredBeanBagsForBlueGoal(beanBags) };
+}
+
+export function scoringForBlueL2Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), blueL2Goal: countScoredBeanBagsForBlueGoal(beanBags) };
+}
+
+export function scoringForBlueL1Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), blueL1Goal: countScoredBeanBagsForBlueGoal(beanBags) };
+}
+
+export function scoringForBlueFloorGoal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), blueFloorGoal: countScoredBeanBagsForBlueGoal(beanBags) };
+}
