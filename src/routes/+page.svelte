@@ -1,20 +1,54 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Scene } from '$lib/Scene';
+	import { generateScenario, type Difficulty } from '$lib/SmartGenerator';
 
 	let currentScene: Scene | null = null;
+	let currentDifficulty = $state<Difficulty>('medium');
 	let isLoading = $state(true);
+	let isReloading = $state(false);
 	let loadingMessage = $state('Loading scene...');
 	let isPanelCollapsed = $state(false);
 
 	function togglePanel() {
 		isPanelCollapsed = !isPanelCollapsed;
-		// Wait for the panel transition to complete, then resize the canvas
 		setTimeout(() => {
 			if (currentScene) {
 				currentScene.resize();
 			}
-		}, 350); // Slightly longer than the 300ms transition
+		}, 350);
+	}
+
+	async function generateNewScenario(scene: Scene) {
+		console.log(`\n=== Generating new scenario (difficulty: ${currentDifficulty}) ===`);
+
+		const scenario = generateScenario(currentDifficulty);
+
+		for (const structure of scenario.structures) {
+			try {
+				await structure.visualize(scene);
+			} catch (error) {
+				console.error('Failed to visualize structure:', error);
+			}
+		}
+
+		console.log(`\n=== Scenario generation complete: ${scenario.structures.length} structures created ===\n`);
+		console.log('Scoring:', scenario.calculateScoring());
+	}
+
+	async function reloadScenario() {
+		if (!currentScene || isReloading) return;
+
+		isReloading = true;
+
+		try {
+			currentScene.clearScoringObjects();
+			await generateNewScenario(currentScene);
+		} catch (error) {
+			console.error('Failed to reload scenario:', error);
+		} finally {
+			isReloading = false;
+		}
 	}
 
 	onMount(() => {
@@ -22,6 +56,7 @@
 			try {
 				currentScene = new Scene('container');
 				await currentScene.initialize();
+				await generateNewScenario(currentScene);
 				isLoading = false;
 			} catch (error) {
 				console.error('Failed to initialize scene:', error);
@@ -87,8 +122,27 @@
 			<div class="flex-none border-b border-[#374151] bg-[#111827] p-3">
 				<h2 class="text-lg font-bold">Scoring Panel</h2>
 			</div>
-			<div class="flex-1 p-4">
-				<!-- Level Up scoring UI will go here -->
+			<div class="flex flex-1 flex-col gap-4 p-4">
+				<div>
+					<label for="difficulty" class="mb-2 block text-sm text-gray-300">Difficulty</label>
+					<select
+						id="difficulty"
+						bind:value={currentDifficulty}
+						class="w-full rounded-md border border-[#374151] bg-[#111827] px-3 py-2 text-white"
+					>
+						<option value="easy">Easy</option>
+						<option value="medium">Medium</option>
+						<option value="hard">Hard</option>
+					</select>
+				</div>
+				<button
+					class="rounded-md bg-[#0076BB] px-4 py-2 font-medium text-white hover:bg-[#005a91] disabled:opacity-50"
+					onclick={reloadScenario}
+					disabled={isReloading || isLoading}
+				>
+					{isReloading ? 'Generating...' : 'New Scenario'}
+				</button>
+				<p class="text-sm text-gray-400">Level Up scoring UI will go here.</p>
 			</div>
 		{/if}
 	</div>

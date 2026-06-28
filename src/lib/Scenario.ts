@@ -1,30 +1,20 @@
 import type { ScenarioScoring } from './Scoring';
-import type { Structure } from './ScoringObject';
-import type { BeamOnFloorStructure } from './structure/BeamOnFloorStructure';
-import type { FloorGoalStructure } from './structure/FloorGoalStructure';
-import type { RemainingPinsStructure } from './structure/RemainingPinsStructure';
-import type { StandoffGoalStructure } from './structure/StandoffGoalStructure';
-import type { StartingPinStructure } from './structure/StartingPinStructure';
+import type { L4GoalStructure } from './structure/L4GoalStructure';
+import type { RedL3GoalStructure } from './structure/RedL3GoalStructure';
 
 export class Scenario {
 	constructor(
-		public standoffGoal: StandoffGoalStructure,
-		public beamOnFloor: BeamOnFloorStructure,
-		public floorGoal: FloorGoalStructure,
-		public otherStructures: Structure[],
-		public startingPin: StartingPinStructure,
-		public remainingPins: RemainingPinsStructure
+		public l4Goal: L4GoalStructure,
+		public redL3Goal: RedL3GoalStructure
 	) {}
 
-	get structures(): Structure[] {
-		return [this.standoffGoal, this.beamOnFloor, this.floorGoal, ...this.otherStructures, this.startingPin, this.remainingPins];
+	get structures() {
+		return [this.l4Goal, this.redL3Goal];
 	}
 
 	calculateScoring(): ScenarioScoring {
 		return {
-			structures: this.structures.map((structure) => structure.getScoring()),
-			startingPins: 4 - this.startingPin.getElements().length,
-			contacted: 0 // Ignored for now
+			structures: this.structures.map((structure) => structure.getScoring())
 		};
 	}
 }

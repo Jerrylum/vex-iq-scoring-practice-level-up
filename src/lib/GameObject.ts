@@ -44,20 +44,6 @@ export abstract class GameObject {
 	}
 }
 
-export class PinObject extends GameObject {
-	constructor(model: THREE.Group, color: string, instanceId: number) {
-		super(model, `${color}Pin_${instanceId}`);
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {
-		// Rotate the model to correct orientation
-		this.model.rotation.x = -Math.PI / 2;
-
-		super.prepareModel();
-	}
-}
-
 export class BeamObject extends GameObject {
 	constructor(model: THREE.Group) {
 		super(model, `Beam_${Math.random().toString(36).substring(2, 15)}`);

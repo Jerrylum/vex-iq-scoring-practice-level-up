@@ -1,4 +1,4 @@
-import type { PinColor, Scene } from './Scene';
+import type { BeanBagColor, Scene } from './Scene';
 import type { StructureScoring } from './Scoring';
 
 export abstract class ScoringObject {
@@ -6,36 +6,30 @@ export abstract class ScoringObject {
 	public robot2Contacted = false;
 }
 
-export abstract class Pin extends ScoringObject {
-	public readonly color: PinColor;
+export abstract class BeanBag extends ScoringObject {
+	public readonly color: BeanBagColor;
 
-	constructor(color: PinColor) {
+	constructor(color: BeanBagColor) {
 		super();
 		this.color = color;
 	}
 }
 
-export class RedPin extends Pin {
+export class RedBeanBag extends BeanBag {
 	constructor() {
 		super('red');
 	}
 }
 
-export class BluePin extends Pin {
+export class BlueBeanBag extends BeanBag {
 	constructor() {
 		super('blue');
 	}
 }
 
-export class OrangePin extends Pin {
+export class YellowBeanBag extends BeanBag {
 	constructor() {
-		super('orange');
-	}
-}
-
-export class Beam extends ScoringObject {
-	constructor() {
-		super();
+		super('yellow');
 	}
 }
 
@@ -46,73 +40,71 @@ export abstract class Structure {
 }
 
 export class Resources {
-	public readonly redPinsMaxCount = 10;
-	public readonly bluePinsMaxCount = 10;
-	public readonly orangePinsMaxCount = 16;
-	public readonly beamsMaxCount = 2;
+	public readonly redBeanBagsMaxCount = 16;
+	public readonly blueBeanBagsMaxCount = 16;
+	public readonly yellowBeanBagsMaxCount = 6;
 
 	private structures: Structure[] = [];
-	private redPinsUsed = 0;
-	private bluePinsUsed = 0;
-	private orangePinsUsed = 0;
-	private beamsUsed = 0;
+	private redBeanBagsUsed = 0;
+	private blueBeanBagsUsed = 0;
+	private yellowBeanBagsUsed = 0;
 
 	public use(structure: Structure): void {
 		const elements = structure.getElements();
-		let redPinsCount = this.redPinsUsed;
-		let bluePinsCount = this.bluePinsUsed;
-		let orangePinsCount = this.orangePinsUsed;
-		let beamsCount = this.beamsUsed;
+		let redCount = this.redBeanBagsUsed;
+		let blueCount = this.blueBeanBagsUsed;
+		let yellowCount = this.yellowBeanBagsUsed;
+
 		for (const element of elements) {
-			if (element instanceof RedPin) {
-				redPinsCount++;
-				if (redPinsCount > this.redPinsMaxCount) {
-					throw new Error('Red pins count exceeds max count');
+			if (element instanceof RedBeanBag) {
+				redCount++;
+				if (redCount > this.redBeanBagsMaxCount) {
+					throw new Error('Red bean bags count exceeds max count');
 				}
 			}
-			if (element instanceof BluePin) {
-				bluePinsCount++;
-				if (bluePinsCount > this.bluePinsMaxCount) {
-					throw new Error('Blue pins count exceeds max count');
+			if (element instanceof BlueBeanBag) {
+				blueCount++;
+				if (blueCount > this.blueBeanBagsMaxCount) {
+					throw new Error('Blue bean bags count exceeds max count');
 				}
 			}
-			if (element instanceof OrangePin) {
-				orangePinsCount++;
-				if (orangePinsCount > this.orangePinsMaxCount) {
-					throw new Error('Orange pins count exceeds max count');
-				}
-			}
-			if (element instanceof Beam) {
-				beamsCount++;
-				if (beamsCount > this.beamsMaxCount) {
-					throw new Error('Beams count exceeds max count');
+			if (element instanceof YellowBeanBag) {
+				yellowCount++;
+				if (yellowCount > this.yellowBeanBagsMaxCount) {
+					throw new Error('Yellow bean bags count exceeds max count');
 				}
 			}
 		}
-		this.redPinsUsed += redPinsCount;
-		this.bluePinsUsed += bluePinsCount;
-		this.orangePinsUsed += orangePinsCount;
-		this.beamsUsed += beamsCount;
+
+		this.redBeanBagsUsed = redCount;
+		this.blueBeanBagsUsed = blueCount;
+		this.yellowBeanBagsUsed = yellowCount;
 		this.structures.push(structure);
 	}
 
-	public getRedPinsUsed(): number {
-		return this.redPinsUsed;
+	public getRedBeanBagsUsed(): number {
+		return this.redBeanBagsUsed;
 	}
 
-	public getBluePinsUsed(): number {
-		return this.bluePinsUsed;
+	public getBlueBeanBagsUsed(): number {
+		return this.blueBeanBagsUsed;
 	}
 
-	public getOrangePinsUsed(): number {
-		return this.orangePinsUsed;
-	}
-
-	public getBeamsUsed(): number {
-		return this.beamsUsed;
+	public getYellowBeanBagsUsed(): number {
+		return this.yellowBeanBagsUsed;
 	}
 
 	public getStructures(): Structure[] {
 		return this.structures;
 	}
+}
+
+export function countBeanBags(elements: ScoringObject[]): { red: number; blue: number; yellow: number } {
+	const counts = { red: 0, blue: 0, yellow: 0 };
+	for (const element of elements) {
+		if (element instanceof RedBeanBag) counts.red++;
+		else if (element instanceof BlueBeanBag) counts.blue++;
+		else if (element instanceof YellowBeanBag) counts.yellow++;
+	}
+	return counts;
 }

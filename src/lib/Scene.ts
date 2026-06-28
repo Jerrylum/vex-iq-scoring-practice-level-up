@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import {
-	PinObject,
 	BeamObject,
 	Field,
 	GameObject,
@@ -15,12 +14,11 @@ import {
 } from './GameObject';
 import { Renderer } from './Renderer';
 
-export type PinColor = 'red' | 'blue' | 'orange';
+export type BeanBagColor = 'red' | 'blue' | 'yellow';
 
 const colorName = {
 	red: 'Red',
 	blue: 'Blue',
-	orange: 'Orange',
 	yellow: 'Yellow'
 };
 
@@ -29,13 +27,7 @@ export class Scene {
 	private modelLoader: ModelLoader;
 	private field: Field | null = null;
 	private fieldObjects: GameObject[] = [];
-	private gameObjects: GameObject[] = [];
-	private pinCounter: Map<PinColor, number> = new Map([
-		['red', 0],
-		['blue', 0],
-		['orange', 0]
-	]);
-	private beamCounter: number = 0;
+	private scoringObjects: GameObject[] = [];
 	private beanBagCounter: Map<'red' | 'blue' | 'yellow', number> = new Map([
 		['red', 0],
 		['blue', 0],
@@ -144,10 +136,6 @@ export class Scene {
 		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.25, 0, ft * -3.5));
 		this.addBeam12x2('red', new THREE.Vector3(-ft * 2.75, 0, ft * -3.5));
 
-		this.addBeanBag('red', new THREE.Vector3(0, 0, ft * 0.5));
-		this.addBeanBag('yellow', new THREE.Vector3(0, 0, 0));
-		this.addBeanBag('blue', new THREE.Vector3(0, 0, ft * -0.5));
-
 		const maxDim = 1600;
 
 		this.renderer.setCameraView(new THREE.Vector3(1600, 1600, 0), new THREE.Vector3(0, 0, 0));
@@ -171,94 +159,13 @@ export class Scene {
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Goal.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Goal Blue'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'Beam12x2 Blue'),
 			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam10x2.obj', '/VIQRC-LevelUp-H2H-_-ColorRed.mtl', 'Beam10x2 Red'),
-			this.modelLoader.loadModel(
-				'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
-				'/VIQRC-LevelUp-H2H-_-Common.mtl',
-				'Beam10x2 Gray'
-			),
-			this.modelLoader.loadModel(
-				'/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj',
-				'/VIQRC-LevelUp-H2H-_-ColorRed.mtl',
-				'BeanBag Red'
-			)
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'Beam10x2 Gray'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj', '/VIQRC-LevelUp-H2H-_-ColorRed.mtl', 'BeanBag Red'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj', '/VIQRC-LevelUp-H2H-_-ColorBlue.mtl', 'BeanBag Blue'),
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_BeanBag.obj', '/VIQRC-LevelUp-H2H-_-ColorYellow.mtl', 'BeanBag Yellow')
 		]);
 
 		console.log('All game object models preloaded');
-	}
-
-	public async addPin(color: PinColor, position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)): Promise<PinObject> {
-		// TODO: Level Up pin assets
-		throw new Error('Not implemented: Level Up pin assets');
-	}
-
-	public async addBeam(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)): Promise<BeamObject> {
-		// TODO: Level Up beam assets
-		throw new Error('Not implemented: Level Up beam assets');
-	}
-
-	public async addBeam12x2(
-		color: 'red' | 'blue',
-		position: THREE.Vector3,
-		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
-	): Promise<BeamObject> {
-		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj',
-			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
-			`Beam12x2 ${colorName[color]}`
-		);
-
-		const beam = new BeamObject(model);
-		beam.setPosition(position);
-		beam.setRotation(rotation);
-
-		this.renderer.scene.add(beam.getObject());
-		this.gameObjects.push(beam);
-
-		console.log(`Added ${color} 12x2 beam at`, position);
-		return beam;
-	}
-
-	public async addBeam10x2(
-		color: 'red' | 'blue',
-		position: THREE.Vector3,
-		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
-	): Promise<BeamObject> {
-		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam10x2.obj',
-			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
-			`Beam10x2 ${colorName[color]}`
-		);
-
-		const beam = new BeamObject(model);
-		beam.setPosition(position);
-		beam.setRotation(rotation);
-
-		this.renderer.scene.add(beam.getObject());
-		this.gameObjects.push(beam);
-
-		console.log(`Added ${color} 10x2 beam at`, position);
-		return beam;
-	}
-
-	public async addBeam12x2Gray(
-		position: THREE.Vector3,
-		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
-	): Promise<BeamObject> {
-		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
-			'/VIQRC-LevelUp-H2H-_-Common.mtl',
-			'Beam10x2 Gray'
-		);
-
-		const beam = new BeamObject(model);
-		beam.setPosition(position);
-		beam.setRotation(rotation);
-
-		this.renderer.scene.add(beam.getObject());
-		this.gameObjects.push(beam);
-
-		console.log('Added 10x2 gray beam at', position);
-		return beam;
 	}
 
 	public async addBeanBag(
@@ -280,10 +187,72 @@ export class Scene {
 		beanBag.setRotation(rotation);
 
 		this.renderer.scene.add(beanBag.getObject());
-		this.gameObjects.push(beanBag);
+		this.scoringObjects.push(beanBag);
 
 		console.log(`Added ${color} bean bag at`, position);
 		return beanBag;
+	}
+
+	public async addBeam12x2(
+		color: 'red' | 'blue',
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`Beam12x2 ${colorName[color]}`
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.fieldObjects.push(beam);
+
+		console.log(`Added ${color} 12x2 beam at`, position);
+		return beam;
+	}
+
+	public async addBeam10x2(
+		color: 'red' | 'blue',
+		position: THREE.Vector3,
+		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
+	): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam10x2.obj',
+			`/VIQRC-LevelUp-H2H-_-Color${colorName[color]}.mtl`,
+			`Beam10x2 ${colorName[color]}`
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.fieldObjects.push(beam);
+
+		console.log(`Added ${color} 10x2 beam at`, position);
+		return beam;
+	}
+
+	public async addBeam12x2Gray(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)): Promise<BeamObject> {
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_Beam12x2Gray.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
+			'Beam10x2 Gray'
+		);
+
+		const beam = new BeamObject(model);
+		beam.setPosition(position);
+		beam.setRotation(rotation);
+
+		this.renderer.scene.add(beam.getObject());
+		this.fieldObjects.push(beam);
+
+		console.log('Added 10x2 gray beam at', position);
+		return beam;
 	}
 
 	public async addFloor(position: THREE.Vector3) {
@@ -349,7 +318,11 @@ export class Scene {
 	}
 
 	public async addL4Base(position: THREE.Vector3, rotation: THREE.Euler = new THREE.Euler(0, 0, 0)) {
-		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-GameObjects_L4Base.obj', '/VIQRC-LevelUp-H2H-_-Common.mtl', 'L4 Base');
+		const model = await this.modelLoader.loadModel(
+			'/VIQRC-LevelUp-H2H-_-GameObjects_L4Base.obj',
+			'/VIQRC-LevelUp-H2H-_-Common.mtl',
+			'L4 Base'
+		);
 		const l4Base = new L4BaseObject(model);
 		l4Base.setPosition(position);
 		l4Base.setRotation(rotation);
@@ -376,29 +349,25 @@ export class Scene {
 		return l4Structure;
 	}
 
-	public removeGameObject(gameObject: GameObject): void {
+	public removeScoringObject(gameObject: GameObject): void {
 		this.renderer.scene.remove(gameObject.getObject());
-		const index = this.gameObjects.indexOf(gameObject);
+		const index = this.scoringObjects.indexOf(gameObject);
 		if (index > -1) {
-			this.gameObjects.splice(index, 1);
+			this.scoringObjects.splice(index, 1);
 		}
 	}
 
-	public clearGameObjects(): void {
-		this.gameObjects.forEach((obj) => {
+	public clearScoringObjects(): void {
+		this.scoringObjects.forEach((obj) => {
 			this.renderer.scene.remove(obj.getObject());
 		});
-		this.gameObjects = [];
-		this.pinCounter.set('red', 0);
-		this.pinCounter.set('blue', 0);
-		this.pinCounter.set('orange', 0);
-		this.beamCounter = 0;
+		this.scoringObjects = [];
 		this.beanBagCounter.set('red', 0);
 		this.beanBagCounter.set('blue', 0);
 		this.beanBagCounter.set('yellow', 0);
 	}
 
-	public getGameObjects(): GameObject[] {
-		return [...this.gameObjects];
+	public getScoringObjects(): GameObject[] {
+		return [...this.scoringObjects];
 	}
 }

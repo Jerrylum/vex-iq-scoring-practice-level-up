@@ -1,46 +1,89 @@
-import type { PinColor } from './Scene';
-import type { Beam, ScoringObject, Pin } from './ScoringObject';
+import type { BeanBagColor } from './Scene';
+import type { BeanBag, ScoringObject } from './ScoringObject';
 
+/** Scored bean bag counts per goal tier (by position, not raw color totals). */
 export interface StructureScoring {
-	connectedPins: number;
-	connectedBeams: number;
-	twoColorStacks: number;
-	threeColorStacks: number;
-	matchingGoals: number;
-	stacksPlacedOnStandoffGoal: number;
+	redL3Goal: number; // red + yellow
+	redL2Goal: number; // red + yellow
+	redL1Goal: number; // red + yellow
+	redFloorGoal: number; // red + yellow
+	blueL3Goal: number; // blue + yellow
+	blueL2Goal: number; // blue + yellow
+	blueL1Goal: number; // blue + yellow
+	blueFloorGoal: number; // blue + yellow
+	yellowL4Goal: number; // yellow only
 }
+
+export const GOAL_POINTS = {
+	redFloorGoal: 1,
+	blueFloorGoal: 1,
+	redL1Goal: 3,
+	blueL1Goal: 3,
+	redL2Goal: 6,
+	blueL2Goal: 6,
+	redL3Goal: 12,
+	blueL3Goal: 12,
+	yellowL4Goal: 16
+} as const satisfies Record<keyof StructureScoring, number>;
 
 export interface ScenarioScoring {
 	structures: StructureScoring[];
-	startingPins: number;
-	contacted: number;
+}
+
+export function emptyStructureScoring(): StructureScoring {
+	return {
+		redL3Goal: 0,
+		redL2Goal: 0,
+		redL1Goal: 0,
+		redFloorGoal: 0,
+		blueL3Goal: 0,
+		blueL2Goal: 0,
+		blueL1Goal: 0,
+		blueFloorGoal: 0,
+		yellowL4Goal: 0
+	};
+}
+
+export function calculateScenarioPoints(scoring: StructureScoring): number {
+	let total = 0;
+	for (const key of Object.keys(GOAL_POINTS) as (keyof StructureScoring)[]) {
+		total += scoring[key] * GOAL_POINTS[key];
+	}
+	return total;
 }
 
 export function isNotTouching(e: ScoringObject): boolean {
 	return !e.robot1Contacted && !e.robot2Contacted;
 }
 
-export function isStack(pins: Pin[], beam: Beam | null = null): boolean {
-	return pins.length >= (beam ? 1 : 2) && pins.every(isNotTouching) && (!beam || isNotTouching(beam));
+export function isScoredColorForRedGoal(color: BeanBagColor): boolean {
+	return color === 'red' || color === 'yellow';
 }
 
-export function isStackMatchingGoal(stack: Pin[], matchColor: PinColor): boolean {
-	return isStack(stack) && stack[0]!.color === matchColor;
+export function isScoredColorForBlueGoal(color: BeanBagColor): boolean {
+	return color === 'blue' || color === 'yellow';
 }
 
-export function isTwoColorStack(pins: Pin[], beam: Beam | null = null): boolean {
-	// the stack can be very high, but only contain two colors
-	const colors = new Set<string>();
-	for (const pin of pins) {
-		colors.add(pin.color);
-	}
-	return colors.size === (beam ? 1 : 2) && isStack(pins, beam);
+export function isScoredColorForL4Goal(color: BeanBagColor): boolean {
+	return color === 'yellow';
 }
 
-export function isThreeColorStack(stack: Pin[], beam: Beam | null = null): boolean {
-	const colors = new Set<string>();
-	for (const pin of stack) {
-		colors.add(pin.color);
-	}
-	return colors.size >= (beam ? 2 : 3) && isStack(stack, beam);
+export function countScoredInRedPyramidGoal(beanBags: BeanBag[]): number {
+	return beanBags.filter((bag) => isScoredColorForRedGoal(bag.color)).length;
+}
+
+export function countScoredInBluePyramidGoal(beanBags: BeanBag[]): number {
+	return beanBags.filter((bag) => isScoredColorForBlueGoal(bag.color)).length;
+}
+
+export function countScoredInL4Goal(beanBags: BeanBag[]): number {
+	return beanBags.filter((bag) => isScoredColorForL4Goal(bag.color)).length;
+}
+
+export function scoringForRedL3Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), redL3Goal: countScoredInRedPyramidGoal(beanBags) };
+}
+
+export function scoringForL4Goal(beanBags: BeanBag[]): StructureScoring {
+	return { ...emptyStructureScoring(), yellowL4Goal: countScoredInL4Goal(beanBags) };
 }

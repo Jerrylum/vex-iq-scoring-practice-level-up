@@ -1,371 +1,112 @@
-import { BluePin, OrangePin, RedPin, type Pin } from './ScoringObject';
-import type { PinColor } from './Scene';
-import { BeamWithColumnsCase, BeamWithTwoBottomColumnsCase, JustBeamOnFloorCase } from './structure/BeamOnFloorStructure';
-import { BlueSquareGoalEmptyCase, BlueSquareGoalWithOneColumnCase } from './structure/BlueSquareGoal';
-import { BlueTriangleGoalEmptyCase, BlueTriangleGoalWithColumnsCase } from './structure/BlueTriangleGoal';
-import { FloorGoalEmptyCase, FloorGoalWithColumnsCase } from './structure/FloorGoalStructure';
-import { RedSquareGoalEmptyCase, RedSquareGoalWithOneColumnCase } from './structure/RedSquareGoal';
-import { RedTriangleGoalEmptyCase, RedTriangleGoalWithColumnsCase } from './structure/RedTriangleGoal';
-import { StacksOnFloorCase } from './structure/StacksOnFloorStructure';
+import { BlueBeanBag, RedBeanBag, YellowBeanBag, type BeanBag } from './ScoringObject';
+import type { BeanBagColor } from './Scene';
 import {
-	StandoffGoalBeamPlacedCase,
-	StandoffGoalEmptyCase,
-	StandoffGoalOneColumnCase,
-	StandoffGoalOnlyBeamPlacedCase
-} from './structure/StandoffGoalStructure';
-import { StartingPinCase } from './structure/StartingPinStructure';
+	L4MultipleBeanBagsCase,
+	L4MultipleMixedColorBeanBagsCase,
+	L4NoBeanBagCase,
+	L4OneBeanBagCase,
+	type L4GoalCase
+} from './structure/L4GoalStructure';
+import {
+	RedL3MultipleBeanBagsCase,
+	RedL3MultipleMixedColorBeanBagsCase,
+	RedL3NoBeanBagCase,
+	RedL3OneBeanBagCase,
+	type RedL3GoalCase
+} from './structure/RedL3GoalStructure';
+import type { Stack } from './structure/StackVisualization';
 
 export type Level = 'easy' | 'medium' | 'hard';
 
-export function generateRandomPin(): Pin {
-	switch (Math.floor(Math.random() * 3)) {
-		case 0:
-			return new RedPin();
-		case 1:
-			return new BluePin();
-		case 2:
-			return new OrangePin();
-		default:
-			throw new Error('Invalid pin color');
+function createBeanBag(color: BeanBagColor): BeanBag {
+	switch (color) {
+		case 'red':
+			return new RedBeanBag();
+		case 'blue':
+			return new BlueBeanBag();
+		case 'yellow':
+			return new YellowBeanBag();
 	}
 }
 
-export function generatePins(minCount: number, maxCount: number) {
-	const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
-	const pins = [];
+export function generateBeanBags(color: BeanBagColor, min: number, max: number): BeanBag[] {
+	const count = Math.floor(Math.random() * (max - min + 1)) + min;
+	return Array.from({ length: count }, () => createBeanBag(color));
+}
+
+export function generateRandomOtherColor(exclude: BeanBagColor, min: number, max: number): BeanBag[] {
+	const colors: BeanBagColor[] = (['red', 'blue', 'yellow'] as const).filter((c) => c !== exclude);
+	const count = Math.floor(Math.random() * (max - min + 1)) + min;
+	const bags: BeanBag[] = [];
+
 	for (let i = 0; i < count; i++) {
-		pins.push(generateRandomPin());
+		const color = colors[Math.floor(Math.random() * colors.length)]!;
+		bags.push(createBeanBag(color));
 	}
-	return pins;
+
+	return bags;
 }
 
-export function generatePinsWithPreferredBottom(
-	minCount: number,
-	maxCount: number,
-	preferredBottomColor: PinColor,
-	preferredPossibility: number
-) {
-	const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
-	const pins = [];
-
-	// Add preferred bottom color with given probability
-	if (Math.random() < preferredPossibility) {
-		if (preferredBottomColor === 'red') {
-			pins.push(new RedPin());
-		} else if (preferredBottomColor === 'blue') {
-			pins.push(new BluePin());
-		} else if (preferredBottomColor === 'orange') {
-			pins.push(new OrangePin());
-		}
-	} else {
-		// Add random pin if preferred bottom is not used
-		pins.push(generateRandomPin());
-	}
-
-	// Fill the rest with random pins (avoiding duplicate preferred color)
-	for (let i = 0; i < count - 1; i++) {
-		const pin = generateRandomPin();
-		if (pin.color !== preferredBottomColor || Math.random() < 0.2) {
-			pins.push(pin);
-		} else {
-			i--;
-		}
-	}
-	return pins as Pin[];
+function buildL4MixedStack(): Stack {
+	return [...generateBeanBags('yellow', 2, 3), ...generateRandomOtherColor('yellow', 1, 2)];
 }
 
-export function generateRandomStandoffGoalStructureCase(level: Level) {
-	// for easy: empty case 50% or one stack case 50%
-	// otherwise: beam place case 100%
-	const caseType = Math.random();
+export function generateRandomL4GoalStructureCase(level: Level): L4GoalCase {
+	const roll = Math.random();
+
 	if (level === 'easy') {
-		if (caseType < 0.5) {
-			return new StandoffGoalEmptyCase();
-		} else if (caseType < 0.75) {
-			return new StandoffGoalOnlyBeamPlacedCase();
-		} else {
-			return new StandoffGoalOneColumnCase(generatePins(1, 2));
+		if (roll < 0.5) {
+			return new L4NoBeanBagCase();
 		}
-	} else {
-		if (caseType < 0.4) {
-			return new StandoffGoalOneColumnCase(generatePins(1, 2));
-		} else if (caseType < 0.5) {
-			return new StandoffGoalOnlyBeamPlacedCase();
-		} else {
-			return new StandoffGoalBeamPlacedCase(generatePins(0, 2), generatePins(0, 2), generatePins(0, 2));
-		}
+		return new L4OneBeanBagCase(Math.floor(Math.random() * 2));
 	}
+
+	if (level === 'medium') {
+		if (roll < 0.2) {
+			return new L4NoBeanBagCase();
+		}
+		if (roll < 0.4) {
+			return new L4OneBeanBagCase(Math.floor(Math.random() * 2));
+		}
+		return new L4MultipleBeanBagsCase(generateBeanBags('yellow', 2, 3), generateBeanBags('yellow', 2, 3));
+	}
+
+	if (roll < 0.4) {
+		return new L4MultipleBeanBagsCase(generateBeanBags('yellow', 2, 3), generateBeanBags('yellow', 2, 3));
+	}
+
+	return new L4MultipleMixedColorBeanBagsCase(buildL4MixedStack(), buildL4MixedStack());
 }
 
-export function generateRandomFloorGoalStructureCase(level: Level) {
-	// for easy: empty case 20% or stack cases 80%
-	// medium: place case 100%
-	// hard: place case 100% with 80% within area
-	const caseType = Math.random();
+function buildRedL3MixedStack(): Stack {
+	return [...generateBeanBags('red', 2, 3), ...generateRandomOtherColor('red', 1, 3)];
+}
+
+export function generateRandomRedL3GoalStructureCase(level: Level): RedL3GoalCase {
+	const roll = Math.random();
+
 	if (level === 'easy') {
-		if (caseType < 0.2) {
-			return new FloorGoalEmptyCase();
-		} else {
-			return new FloorGoalWithColumnsCase(
-				Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.9) : [],
-				true,
-				Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.9) : [],
-				true,
-				Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.9) : [],
-				true,
-				Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.9) : [],
-				true
-			);
+		if (roll < 0.5) {
+			return new RedL3NoBeanBagCase();
 		}
-	} else if (level === 'medium') {
-		return new FloorGoalWithColumnsCase(
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.8) : [],
-			true,
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.8) : [],
-			true,
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.8) : [],
-			true,
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'orange', 0.8) : [],
-			true
-		);
-	} else {
-		return new FloorGoalWithColumnsCase(
-			generatePinsWithPreferredBottom(2, 3, 'orange', 0.8),
-			Math.random() < 0.8,
-			generatePinsWithPreferredBottom(2, 3, 'orange', 0.8),
-			Math.random() < 0.8,
-			generatePinsWithPreferredBottom(2, 3, 'orange', 0.8),
-			Math.random() < 0.8,
-			generatePinsWithPreferredBottom(2, 3, 'orange', 0.8),
-			Math.random() < 0.8
-		);
-	}
-}
-
-export function generateRandomBlueSquareGoalStructureCase(level: Level) {
-	// for easy: empty case 20% or one column case 80%
-	// otherwise: one column case 100%
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.2) {
-			return new BlueSquareGoalEmptyCase();
-		} else {
-			return new BlueSquareGoalWithOneColumnCase(generatePins(1, 3));
-		}
-	} else if (level === 'medium') {
-		return new BlueSquareGoalWithOneColumnCase(generatePinsWithPreferredBottom(1, 3, 'blue', 0.8));
-	} else {
-		return new BlueSquareGoalWithOneColumnCase(generatePinsWithPreferredBottom(1, 3, 'blue', 0.7));
-	}
-}
-
-export function generateRandomRedSquareGoalStructureCase(level: Level) {
-	// for easy: empty case 20% or one column case 80%
-	// otherwise: one column case 100%
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.2) {
-			return new RedSquareGoalEmptyCase();
-		} else {
-			return new RedSquareGoalWithOneColumnCase(generatePins(1, 3));
-		}
-	} else if (level === 'medium') {
-		return new RedSquareGoalWithOneColumnCase(generatePinsWithPreferredBottom(1, 3, 'red', 0.8));
-	} else {
-		return new RedSquareGoalWithOneColumnCase(generatePinsWithPreferredBottom(1, 3, 'red', 0.7));
-	}
-}
-
-export function generateRandomRedTriangleGoalStructureCase(level: Level) {
-	// for easy: empty case 20% or columns case 80%
-	// otherwise: columns case 100%
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.2) {
-			return new RedTriangleGoalEmptyCase();
-		} else {
-			return new RedTriangleGoalWithColumnsCase(generatePinsWithPreferredBottom(1, 3, 'red', 0.9), [], []);
-		}
-	} else if (level === 'medium') {
-		return new RedTriangleGoalWithColumnsCase(
-			generatePinsWithPreferredBottom(1, 3, 'red', 0.8),
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'red', 0.8) : [],
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'red', 0.8) : []
-		);
-	} else {
-		return new RedTriangleGoalWithColumnsCase(
-			generatePinsWithPreferredBottom(1, 3, 'red', 0.7),
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'red', 0.7) : [],
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'red', 0.7) : []
-		);
-	}
-}
-
-export function generateRandomBlueTriangleGoalStructureCase(level: Level) {
-	// for easy: empty case 20% or columns case 80%
-	// otherwise: columns case 100%
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.2) {
-			return new BlueTriangleGoalEmptyCase();
-		} else {
-			return new BlueTriangleGoalWithColumnsCase(generatePinsWithPreferredBottom(1, 3, 'blue', 0.9), [], []);
-		}
-	} else if (level === 'medium') {
-		return new BlueTriangleGoalWithColumnsCase(
-			generatePinsWithPreferredBottom(1, 3, 'blue', 0.8),
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'blue', 0.8) : [],
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'blue', 0.8) : []
-		);
-	} else {
-		return new BlueTriangleGoalWithColumnsCase(
-			generatePinsWithPreferredBottom(1, 3, 'blue', 0.7),
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'blue', 0.7) : [],
-			Math.random() < 0.5 ? generatePinsWithPreferredBottom(1, 3, 'blue', 0.7) : []
-		);
-	}
-}
-
-export function generateRandomStartingPinStructureCase(level: Level) {
-	// for easy: untouched case 20% or touched case 80%
-	// otherwise: one column case 100%
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.8) {
-			return new StartingPinCase(false, false, false, false);
-		}
-	}
-	return new StartingPinCase(Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5);
-}
-
-export function generateRandomBeamOnFloorStructureCase(level: Level) {
-	const caseType = Math.random();
-	if (level === 'easy') {
-		if (caseType < 0.7) {
-			return new JustBeamOnFloorCase();
-		} else {
-			return new BeamWithColumnsCase(generatePins(1, 2), generatePins(1, 2), generatePins(1, 2));
-		}
-	} else {
-		if (caseType < 0.3) {
-			const bottomLength = Math.floor(Math.random() * 2) + 1;
-			return new BeamWithTwoBottomColumnsCase(
-				generatePins(bottomLength, bottomLength),
-				generatePins(bottomLength, bottomLength),
-				generatePins(1, 2)
-			);
-		} else if (caseType < 0.6) {
-			return new BeamWithColumnsCase([], generatePins(1, 2), generatePins(1, 2));
-		} else {
-			return new BeamWithColumnsCase(generatePins(1, 2), generatePins(1, 2), generatePins(1, 2));
-		}
-	}
-}
-
-export function generateRandomStacksOnFloorCase(
-	difficulty: 'easy' | 'medium' | 'hard',
-	availableRed: number,
-	availableBlue: number,
-	availableOrange: number
-): StacksOnFloorCase {
-	// Determine number of stacks based on difficulty and available resources
-	let maxStacks: number;
-	let pinsPerStack: number[];
-
-	switch (difficulty) {
-		case 'easy':
-			maxStacks = Math.floor(Math.random() * 2);
-			pinsPerStack = Array.from({ length: maxStacks }, () => Math.floor(Math.random() * 2) + 2);
-			break;
-		default:
-			maxStacks = Math.floor(Math.random() * 4);
-			pinsPerStack = Array.from({ length: maxStacks }, () => Math.floor(Math.random() * 2) + 2);
-			break;
+		return new RedL3OneBeanBagCase([createBeanBag(Math.random() < 0.5 ? 'red' : 'yellow')]);
 	}
 
-	// Adjust maxStacks based on available resources
-	const totalPinsNeeded = pinsPerStack.slice(0, maxStacks).reduce((a, b) => a + b, 0);
-	const totalPinsAvailable = availableRed + availableBlue + availableOrange;
-
-	if (totalPinsNeeded > totalPinsAvailable) {
-		// Reduce stacks if not enough resources
-		maxStacks = Math.min(maxStacks, Math.floor(totalPinsAvailable / 2));
+	if (level === 'medium') {
+		if (roll < 0.2) {
+			return new RedL3NoBeanBagCase();
+		}
+		if (roll < 0.4) {
+			return new RedL3OneBeanBagCase([createBeanBag('red')]);
+		}
+		return new RedL3MultipleBeanBagsCase(generateBeanBags('red', 2, 3));
 	}
 
-	// Ensure at least 0 stacks (can be empty)
-	maxStacks = Math.max(0, maxStacks);
-
-	const stacks: Pin[][] = [];
-	const availableColors: Array<() => Pin> = [];
-
-	if (availableRed > 0) {
-		for (let i = 0; i < availableRed; i++) {
-			availableColors.push(() => new RedPin());
-		}
+	if (roll < 0.2) {
+		return new RedL3OneBeanBagCase([createBeanBag('red')]);
 	}
-	if (availableBlue > 0) {
-		for (let i = 0; i < availableBlue; i++) {
-			availableColors.push(() => new BluePin());
-		}
+	if (roll < 0.4) {
+		return new RedL3MultipleBeanBagsCase(generateBeanBags('red', 2, 3));
 	}
-	if (availableOrange > 0) {
-		for (let i = 0; i < availableOrange; i++) {
-			availableColors.push(() => new OrangePin());
-		}
-	}
-
-	// Shuffle available colors for randomness
-	availableColors.sort(() => Math.random() - 0.5);
-
-	let colorIndex = 0;
-
-	for (let i = 0; i < maxStacks; i++) {
-		const stackSize = pinsPerStack[i] || 2;
-		const stack: Pin[] = [];
-
-		// Try to use different colors in each stack for variety
-		const usedColorsInStack = new Set<string>();
-
-		for (let j = 0; j < stackSize && colorIndex < availableColors.length; j++) {
-			const colorFactory = availableColors[colorIndex];
-			if (!colorFactory) continue;
-
-			const pin = colorFactory();
-
-			// Try to avoid using same color twice in a stack if possible
-			if (usedColorsInStack.has(pin.color) && colorIndex < availableColors.length - 1) {
-				// Look ahead for a different color
-				for (let k = colorIndex + 1; k < Math.min(colorIndex + 10, availableColors.length); k++) {
-					const nextFactory = availableColors[k];
-					if (!nextFactory) continue;
-
-					const nextPin = nextFactory();
-					if (!usedColorsInStack.has(nextPin.color)) {
-						// Swap
-						const temp = availableColors[colorIndex];
-						const swapFactory = availableColors[k];
-						if (temp && swapFactory) {
-							availableColors[colorIndex] = swapFactory;
-							availableColors[k] = temp;
-						}
-						break;
-					}
-				}
-			}
-
-			const finalFactory = availableColors[colorIndex];
-			if (finalFactory) {
-				const finalPin = finalFactory();
-				stack.push(finalPin);
-				usedColorsInStack.add(finalPin.color);
-			}
-			colorIndex++;
-		}
-
-		if (stack.length > 0) {
-			stacks.push(stack);
-		}
-	}
-
-	return new StacksOnFloorCase(stacks);
+	return new RedL3MultipleMixedColorBeanBagsCase(buildRedL3MixedStack());
 }
