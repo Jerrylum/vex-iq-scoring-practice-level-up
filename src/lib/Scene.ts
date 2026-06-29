@@ -50,7 +50,7 @@ export class Scene {
 	}
 
 	private async loadField(): Promise<void> {
-		await this.addField();
+		this.field = await this.addField();
 
 		const maxDim = 1600;
 

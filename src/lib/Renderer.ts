@@ -47,7 +47,6 @@ export class Renderer {
 		this.controls.maxPolarAngle = Math.PI;
 
 		this.setupEnvironment();
-		this.setupLights();
 
 		// Handle window resize
 		window.addEventListener('resize', () => this.onWindowResize());
@@ -61,36 +60,6 @@ export class Renderer {
 		const envMap = this.pmremGenerator.fromScene(environment).texture;
 		this.scene.environment = envMap;
 		environment.removeFromParent();
-	}
-
-	private setupLights(): void {
-		// Soft overall fill; PBR materials get most ambient response from scene.environment
-		const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
-		this.scene.add(ambientLight);
-
-		const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x3a3a3a, 0.45);
-		this.scene.add(hemisphereLight);
-
-		// Key light with shadows
-		const directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
-		directionalLight.position.set(800, 1200, 600);
-		directionalLight.castShadow = true;
-		directionalLight.shadow.mapSize.width = 2048;
-		directionalLight.shadow.mapSize.height = 2048;
-		directionalLight.shadow.camera.near = 1;
-		directionalLight.shadow.camera.far = 5000;
-		const shadowExtent = 2200;
-		directionalLight.shadow.camera.left = -shadowExtent;
-		directionalLight.shadow.camera.right = shadowExtent;
-		directionalLight.shadow.camera.top = shadowExtent;
-		directionalLight.shadow.camera.bottom = -shadowExtent;
-		directionalLight.shadow.bias = -0.0001;
-		this.scene.add(directionalLight);
-
-		// Subtle fill from the opposite side
-		const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
-		fillLight.position.set(-600, 400, -800);
-		this.scene.add(fillLight);
 	}
 
 	public setCameraView(position: THREE.Vector3, target: THREE.Vector3): void {
