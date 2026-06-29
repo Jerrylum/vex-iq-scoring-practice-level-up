@@ -12,8 +12,14 @@ export interface LoadedModel {
 /** GLB exports from Blender are in meters; the rest of the scene uses millimeters. */
 const GLTF_TO_SCENE_SCALE = 1000;
 
+type MTLMaterialLibrary = {
+	materialsInfo: Record<string, unknown>;
+	create: (materialName: string) => THREE.Material;
+};
+
 export class ModelLoader {
 	private modelCache: Map<string, THREE.Group> = new Map();
+	private mtlCache: Map<string, MTLMaterialLibrary> = new Map();
 
 	private updateLoadingProgress(message: string): void {
 		const loadingElement = document.getElementById('loading');
@@ -41,18 +47,71 @@ export class ModelLoader {
 		return meshCount;
 	}
 
+	/** Swap GLB PBR materials for matching OBJ/MTL materials by name. */
+	private applyMTLMaterials(object: THREE.Object3D, materials: MTLMaterialLibrary): void {
+		const swapMaterial = (material: THREE.Material): THREE.Material => {
+			const { name } = material;
+			if (!name || materials.materialsInfo[name] === undefined) {
+				console.warn(`No MTL material found for GLB material: ${name ?? '(unnamed)'}`);
+				return material;
+			}
+
+			material.dispose();
+			return materials.create(name);
+		};
+
+		object.traverse((child) => {
+			if (!(child instanceof THREE.Mesh)) {
+				return;
+			}
+
+			if (Array.isArray(child.material)) {
+				child.material = child.material.map(swapMaterial);
+			} else {
+				child.material = swapMaterial(child.material);
+			}
+		});
+	}
+
+	private loadMTL(mtlPath: string): Promise<MTLMaterialLibrary> {
+		if (this.mtlCache.has(mtlPath)) {
+			return Promise.resolve(this.mtlCache.get(mtlPath)!);
+		}
+
+		const mtlLoader = new MTLLoader();
+
+		return new Promise((resolve, reject) => {
+			mtlLoader.load(
+				mtlPath,
+				(materials) => {
+					materials.preload();
+					this.mtlCache.set(mtlPath, materials);
+					resolve(materials);
+				},
+				undefined,
+				reject
+			);
+		});
+	}
+
 	private isGLTFPath(path: string): boolean {
 		return path.endsWith('.glb') || path.endsWith('.gltf');
 	}
 
-	private async loadGLB(glbPath: string, onProgress?: (percent: number) => void): Promise<THREE.Group> {
+	private async loadGLB(
+		glbPath: string,
+		mtlPath: string,
+		onProgress?: (percent: number) => void
+	): Promise<THREE.Group> {
 		const loader = new GLTFLoader();
+		const materials = await this.loadMTL(mtlPath);
 
 		return new Promise((resolve, reject) => {
 			loader.load(
 				glbPath,
 				(gltf) => {
 					gltf.scene.scale.multiplyScalar(GLTF_TO_SCENE_SCALE);
+					this.applyMTLMaterials(gltf.scene, materials);
 
 					const meshCount = this.prepareMeshes(gltf.scene);
 
@@ -121,7 +180,7 @@ export class ModelLoader {
 	}
 
 	public async loadModel(modelPath: string, mtlPath: string, modelName: string): Promise<THREE.Group> {
-		const cacheKey = this.isGLTFPath(modelPath) ? modelPath : `${modelPath}|${mtlPath}`;
+		const cacheKey = `${modelPath}|${mtlPath}`;
 
 		// Check if model is already cached
 		if (this.modelCache.has(cacheKey)) {
@@ -137,7 +196,7 @@ export class ModelLoader {
 		};
 
 		const object = this.isGLTFPath(modelPath)
-			? await this.loadGLB(modelPath, onProgress)
+			? await this.loadGLB(modelPath, mtlPath, onProgress)
 			: await this.loadOBJ(modelPath, mtlPath, onProgress);
 
 		// Cache the model
@@ -150,5 +209,6 @@ export class ModelLoader {
 
 	public clearCache(): void {
 		this.modelCache.clear();
+		this.mtlCache.clear();
 	}
 }

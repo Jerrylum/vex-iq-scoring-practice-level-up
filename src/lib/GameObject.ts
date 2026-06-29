@@ -91,7 +91,6 @@ export class L4StructureObject extends GameObject {
 
 	protected override prepareModel(): void {
 		this.model.rotation.x = -Math.PI / 2;
-		// this.model.rotation.z = +Math.PI / 2;
 		this.model.position.y = 113;
 		super.prepareModel();
 	}
@@ -104,7 +103,7 @@ export class L4BaseObject extends GameObject {
 	}
 
 	protected override prepareModel(): void {
-		this.model.rotation.y = +Math.PI / 2;
+		this.model.rotation.x = -Math.PI / 2;
 		this.model.position.y = 113;
 		super.prepareModel();
 	}
