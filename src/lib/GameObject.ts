@@ -52,7 +52,7 @@ export class BeanBagObject extends GameObject {
 
 	protected override prepareModel(): void {
 		// this.model.rotation.x = Math.PI;
-		this.model.position.y = 113;
+		this.model.position.y = -13;
 
 		super.prepareModel();
 	}
@@ -66,8 +66,6 @@ export class Field extends GameObject {
 
 	protected override prepareModel(): void {
 		this.model.rotation.x = -Math.PI / 2;
-		this.model.position.y = 113;
-
 		super.prepareModel();
 	}
 }

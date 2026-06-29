@@ -68,21 +68,17 @@ export class Scene {
 
 	private async preloadGameObjects(): Promise<void> {
 		await Promise.all([
-			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-FieldElements.glb', '', 'Field'),
-			this.modelLoader.loadModel(beanBagModelPath.red, '', 'BeanBag Red'),
-			this.modelLoader.loadModel(beanBagModelPath.blue, '', 'BeanBag Blue'),
-			this.modelLoader.loadModel(beanBagModelPath.yellow, '', 'BeanBag Yellow')
+			this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-FieldElements.glb', 'Field'),
+			this.modelLoader.loadModel(beanBagModelPath.red, 'BeanBag Red'),
+			this.modelLoader.loadModel(beanBagModelPath.blue, 'BeanBag Blue'),
+			this.modelLoader.loadModel(beanBagModelPath.yellow, 'BeanBag Yellow')
 		]);
 
 		console.log('All game object models preloaded');
 	}
 
 	public async addField(position: THREE.Vector3 = new THREE.Vector3(0, 0, 0)): Promise<Field> {
-		const model = await this.modelLoader.loadModel(
-			'/VIQRC-LevelUp-H2H-_-FieldElements.glb',
-			'',
-			'Field'
-		);
+		const model = await this.modelLoader.loadModel('/VIQRC-LevelUp-H2H-_-FieldElements.glb', 'Field');
 		const field = new Field(model);
 		field.setPosition(position);
 
@@ -100,7 +96,6 @@ export class Scene {
 	): Promise<BeanBagObject> {
 		const model = await this.modelLoader.loadModel(
 			beanBagModelPath[color],
-			'',
 			`BeanBag ${colorName[color]}`
 		);
 
