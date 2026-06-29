@@ -17,13 +17,13 @@ This project simplifies some edge cases for learning, but works well as a starti
 
 ### Scoring (2026–2027 Level Up)
 
-| Goal | Points per scored bean bag |
-| --- | --- |
-| Floor | 1 |
-| L1 | 3 |
-| L2 | 6 |
-| L3 | 12 |
-| L4 | 16 |
+| Goal  | Points per scored bean bag |
+| ----- | -------------------------- |
+| Floor | 1                          |
+| L1    | 3                          |
+| L2    | 6                          |
+| L3    | 12                         |
+| L4    | 16                         |
 
 In red and blue goals, **red/blue and yellow** bean bags can score. On the **L4 goal**, only **yellow** bean bags score.
 

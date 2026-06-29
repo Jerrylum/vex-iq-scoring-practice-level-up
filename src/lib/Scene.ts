@@ -52,9 +52,6 @@ export class Scene {
 	private async loadField(): Promise<void> {
 		await this.addField();
 
-		// TEST ONLY
-		this.addBeanBag('red', new THREE.Vector3(0, 0, 0), new THREE.Euler(0, 0, 0));
-
 		const maxDim = 1600;
 
 		this.renderer.setCameraView(new THREE.Vector3(0, 1600, 1600), new THREE.Vector3(0, 0, 0));
@@ -94,10 +91,7 @@ export class Scene {
 		position: THREE.Vector3,
 		rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
 	): Promise<BeanBagObject> {
-		const model = await this.modelLoader.loadModel(
-			beanBagModelPath[color],
-			`BeanBag ${colorName[color]}`
-		);
+		const model = await this.modelLoader.loadModel(beanBagModelPath[color], `BeanBag ${colorName[color]}`);
 
 		const instanceId = this.beanBagCounter.get(color)!;
 		this.beanBagCounter.set(color, instanceId + 1);
