@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 export class Renderer {
 	public scene: THREE.Scene;
@@ -7,6 +8,7 @@ export class Renderer {
 	private renderer: THREE.WebGLRenderer;
 	private controls: OrbitControls;
 	private container: HTMLElement;
+	private pmremGenerator: THREE.PMREMGenerator;
 
 	constructor(containerId: string) {
 		this.container = document.getElementById(containerId)!;
@@ -21,12 +23,19 @@ export class Renderer {
 		this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000);
 		this.camera.position.set(100, 100, 100);
 
-		// Initialize renderer with standard settings
+		// Initialize renderer with PBR-friendly output
 		this.renderer = new THREE.WebGLRenderer({ antialias: true });
+		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		this.renderer.setSize(width, height);
-		this.renderer.shadowMap.enabled = true;
+		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		this.renderer.toneMappingExposure = 0.2;
+		this.renderer.shadowMap.enabled = false;
 		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 		this.container.appendChild(this.renderer.domElement);
+
+		this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+		this.pmremGenerator.compileEquirectangularShader();
 
 		// Initialize OrbitControls for mouse camera control
 		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -37,7 +46,7 @@ export class Renderer {
 		this.controls.maxDistance = 2000;
 		this.controls.maxPolarAngle = Math.PI;
 
-		// Add lights
+		this.setupEnvironment();
 		this.setupLights();
 
 		// Handle window resize
@@ -47,27 +56,41 @@ export class Renderer {
 		this.animate();
 	}
 
+	private setupEnvironment(): void {
+		const environment = new RoomEnvironment();
+		const envMap = this.pmremGenerator.fromScene(environment).texture;
+		this.scene.environment = envMap;
+		environment.removeFromParent();
+	}
+
 	private setupLights(): void {
-		// Ambient light for general illumination
-		const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+		// Soft overall fill; PBR materials get most ambient response from scene.environment
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
 		this.scene.add(ambientLight);
 
-		// Main directional light
-		const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-		directionalLight.position.set(100, 100, 50);
+		const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x3a3a3a, 0.45);
+		this.scene.add(hemisphereLight);
+
+		// Key light with shadows
+		const directionalLight = new THREE.DirectionalLight(0xffffff, 1.1);
+		directionalLight.position.set(800, 1200, 600);
 		directionalLight.castShadow = true;
 		directionalLight.shadow.mapSize.width = 2048;
 		directionalLight.shadow.mapSize.height = 2048;
+		directionalLight.shadow.camera.near = 1;
+		directionalLight.shadow.camera.far = 5000;
+		const shadowExtent = 2200;
+		directionalLight.shadow.camera.left = -shadowExtent;
+		directionalLight.shadow.camera.right = shadowExtent;
+		directionalLight.shadow.camera.top = shadowExtent;
+		directionalLight.shadow.camera.bottom = -shadowExtent;
+		directionalLight.shadow.bias = -0.0001;
 		this.scene.add(directionalLight);
 
-		// Fill lights for better model visibility
-		const light1 = new THREE.DirectionalLight(0xffffff, 0.4);
-		light1.position.set(-100, 50, -50);
-		this.scene.add(light1);
-
-		const light2 = new THREE.DirectionalLight(0xffffff, 0.3);
-		light2.position.set(0, -50, 100);
-		this.scene.add(light2);
+		// Subtle fill from the opposite side
+		const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+		fillLight.position.set(-600, 400, -800);
+		this.scene.add(fillLight);
 	}
 
 	public setCameraView(position: THREE.Vector3, target: THREE.Vector3): void {
@@ -82,6 +105,7 @@ export class Renderer {
 		const height = this.container.clientHeight;
 		this.camera.aspect = width / height;
 		this.camera.updateProjectionMatrix();
+		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 		this.renderer.setSize(width, height);
 	}
 

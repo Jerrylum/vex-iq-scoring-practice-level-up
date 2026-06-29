@@ -44,84 +44,6 @@ export abstract class GameObject {
 	}
 }
 
-export class BeamObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `Beam_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {
-		// Rotate the model to correct orientation
-		this.model.rotation.x = -Math.PI / 2;
-		this.model.rotation.z = +Math.PI / 2;
-		this.model.position.y = 113;
-
-		super.prepareModel();
-	}
-}
-
-export class FloorObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `Floor_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {}
-}
-
-export class WallObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `Wall_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-}
-
-export class CornerObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `Corner_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-}
-
-export class L4StructureObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, `L4Structure_${Math.random().toString(36).substring(2, 15)}`);
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {
-		this.model.rotation.x = -Math.PI / 2;
-		this.model.position.y = 113;
-		super.prepareModel();
-	}
-}
-
-export class L4BaseObject extends GameObject {
-	constructor(model: THREE.Group) {
-		super(model, 'L4Base');
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {
-		this.model.rotation.x = -Math.PI / 2;
-		this.model.position.y = 113;
-		super.prepareModel();
-	}
-}
-
-export class GoalObject extends GameObject {
-	constructor(model: THREE.Group, color: string) {
-		super(model, `Goal_${color}`);
-		this.prepareModel();
-	}
-
-	protected override prepareModel(): void {
-		this.model.rotation.x = -Math.PI / 2;
-		this.model.position.y = 111;
-		super.prepareModel();
-	}
-}
-
 export class BeanBagObject extends GameObject {
 	constructor(model: THREE.Group, color: string, instanceId: number) {
 		super(model, `${color}BeanBag_${instanceId}`);
@@ -129,7 +51,9 @@ export class BeanBagObject extends GameObject {
 	}
 
 	protected override prepareModel(): void {
+		// this.model.rotation.x = Math.PI;
 		this.model.position.y = 113;
+
 		super.prepareModel();
 	}
 }
@@ -138,5 +62,12 @@ export class Field extends GameObject {
 	constructor(model: THREE.Group) {
 		super(model, 'Field');
 		this.prepareModel();
+	}
+
+	protected override prepareModel(): void {
+		this.model.rotation.x = -Math.PI / 2;
+		this.model.position.y = 113;
+
+		super.prepareModel();
 	}
 }
