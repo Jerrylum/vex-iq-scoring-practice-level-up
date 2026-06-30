@@ -176,7 +176,7 @@
 						>
 							?
 						</button>
-						<button class="rounded-md bg-[#888B95] px-2 py-1 text-xs hover:bg-[#6b6e76] md:hidden" onclick={togglePanel}> Close </button>
+						<button class="rounded-md bg-[#888B95] px-2 py-1 text-xs hover:bg-[#6b6e76] md:hidden" onclick={togglePanel}> Go to simulator </button>
 					</div>
 				</div>
 
